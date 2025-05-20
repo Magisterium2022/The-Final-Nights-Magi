@@ -171,8 +171,7 @@
 	violates_masquerade = TRUE
 
 	cancelable = TRUE
-	duration_length = 20 SECONDS
-	cooldown_length = 20 SECONDS
+	cooldown_length = 10 SECONDS
 
 	grouped_powers = list(
 		/datum/discipline_power/protean/feral_claws,
@@ -219,8 +218,7 @@
 	violates_masquerade = TRUE
 
 	cancelable = TRUE
-	duration_length = 20 SECONDS
-	cooldown_length = 20 SECONDS
+	cooldown_length = 10 SECONDS
 
 	grouped_powers = list(
 		/datum/discipline_power/protean/feral_claws,
