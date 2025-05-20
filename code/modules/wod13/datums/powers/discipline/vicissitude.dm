@@ -588,8 +588,7 @@
 
 	violates_masquerade = TRUE
 
-	duration_length = 20 SECONDS
-	cooldown_length = 20 SECONDS
+	cooldown_length = 10 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/tzimisce/horrid_form_shapeshift
 
@@ -622,8 +621,7 @@
 
 	violates_masquerade = TRUE
 
-	duration_length = 20 SECONDS
-	cooldown_length = 20 SECONDS
+	cooldown_length = 10 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/bloodcrawler/bloodform_shapeshift
 
