@@ -148,6 +148,7 @@
 /obj/effect/proc_holder/spell/targeted/shapeshift/animalism
 	name = "Animalism Form"
 	desc = "Take on the shape a bat."
+	player_lock = FALSE
 	invocation_emote_self = null
 	invocation_type = "none"
 	charge_max = 5 SECONDS
