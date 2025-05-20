@@ -589,6 +589,7 @@
 	violates_masquerade = TRUE
 
 	cooldown_length = 10 SECONDS
+	duration_override = TRUE
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/tzimisce/horrid_form_shapeshift
 
@@ -622,6 +623,7 @@
 	violates_masquerade = TRUE
 
 	cooldown_length = 10 SECONDS
+	duration_override = TRUE
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/bloodcrawler/bloodform_shapeshift
 
