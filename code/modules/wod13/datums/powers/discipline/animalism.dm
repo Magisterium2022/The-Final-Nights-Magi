@@ -148,10 +148,13 @@
 /obj/effect/proc_holder/spell/targeted/shapeshift/animalism
 	name = "Animalism Form"
 	desc = "Take on the shape a bat."
+	invocation_emote_self = null
+	invocation_type = "none"
 	charge_max = 5 SECONDS
 	cooldown_min = 5 SECONDS
 	revert_on_death = TRUE
 	die_with_shapeshifted_form = FALSE
+	convert_damage = FALSE
 	shapeshift_type = /mob/living/simple_animal/hostile/beastmaster/rat/flying
 
 /datum/discipline_power/animalism/rat_shapeshift
