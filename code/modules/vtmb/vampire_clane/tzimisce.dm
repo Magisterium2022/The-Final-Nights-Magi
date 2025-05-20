@@ -26,6 +26,7 @@
 	cooldown_min = 10 SECONDS
 	revert_on_death = TRUE
 	die_with_shapeshifted_form = FALSE
+	convert_damage = FALSE
 	shapeshift_type = /mob/living/simple_animal/hostile/tzimisce_beast
 
 /obj/effect/proc_holder/spell/targeted/shapeshift/bloodcrawler
@@ -35,6 +36,7 @@
 	cooldown_min = 5 SECONDS
 	revert_on_death = TRUE
 	die_with_shapeshifted_form = FALSE
+	convert_damage = FALSE
 	shapeshift_type = /mob/living/simple_animal/hostile/bloodcrawler
 
 /datum/vampireclane/tzimisce/post_gain(mob/living/carbon/human/H)
