@@ -27,6 +27,7 @@
 	player_lock = FALSE
 	charge_max = 10 SECONDS
 	cooldown_min = 10 SECONDS
+	duration_override = TRUE
 	revert_on_death = TRUE
 	die_with_shapeshifted_form = FALSE
 	convert_damage = FALSE
@@ -40,6 +41,7 @@
 	player_lock = FALSE
 	charge_max = 5 SECONDS
 	cooldown_min = 5 SECONDS
+	duration_override = TRUE
 	revert_on_death = TRUE
 	die_with_shapeshifted_form = FALSE
 	convert_damage = FALSE
