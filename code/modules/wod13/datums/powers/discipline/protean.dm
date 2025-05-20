@@ -104,10 +104,14 @@
 /obj/effect/proc_holder/spell/targeted/shapeshift/gangrel
 	name = "Gangrel Form"
 	desc = "Take on the shape a wolf."
+	invocation_emote_self = null
+	invocation_type = "none"
+	player_lock = FALSE
 	charge_max = 50
 	cooldown_min = 5 SECONDS
 	revert_on_death = TRUE
 	die_with_shapeshifted_form = FALSE
+	convert_damage = FALSE
 	shapeshift_type = /mob/living/simple_animal/hostile/gangrel
 
 /datum/discipline_power/protean/earth_meld
