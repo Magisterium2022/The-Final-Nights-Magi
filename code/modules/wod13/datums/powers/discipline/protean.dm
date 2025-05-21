@@ -173,7 +173,6 @@
 	cancelable = TRUE
 	duration_length = 20 SECONDS
 	cooldown_length = 20 SECONDS
-	duration_override = TRUE
 
 	grouped_powers = list(
 		/datum/discipline_power/protean/feral_claws,
@@ -222,7 +221,6 @@
 	cancelable = TRUE
 	duration_length = 20 SECONDS
 	cooldown_length = 20 SECONDS
-	duration_override = TRUE
 
 	grouped_powers = list(
 		/datum/discipline_power/protean/feral_claws,
