@@ -64,3 +64,6 @@
 		var/mob/camera/blob/B = owner.current
 		if(istype(B))
 			. += "(Progress: [B.blobs_legit.len]/[B.blobwincount])"
+
+/datum/antagonist/blob/flesh
+	name = "Flesh Matrix"
