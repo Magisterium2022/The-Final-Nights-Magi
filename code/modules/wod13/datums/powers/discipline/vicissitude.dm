@@ -648,7 +648,7 @@
 	for(var/datum/action/basic_vicissitude/vicissitude_upgrade in owner.actions)
 		vicissitude_upgrade.Remove(owner)
 
-	var/datum/action/advanced_vicissitude/vicissitude_upgrade_advanced = new() 
+	var/datum/action/advanced_vicissitude/vicissitude_upgrade_advanced = new()
 	vicissitude_upgrade_advanced.Grant(owner)
 
 // REWORK ABILITIES AND VERBS
