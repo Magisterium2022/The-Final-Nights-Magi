@@ -114,6 +114,8 @@
 	var/is_zombie = FALSE
 	///Whether or not this is a fragile spore from Distributed Neurons
 	var/is_weak = FALSE
+	//Whether or not it's a blob variant
+	var/is_variant = FALSE
 
 /mob/living/simple_animal/hostile/blob/blobspore/Initialize(mapload, obj/structure/blob/special/linked_node)
 	. = ..()
