@@ -167,7 +167,7 @@
 	violates_masquerade = TRUE
 
 	cooldown_length = 8 SECONDS
-	duration_override = TRUE
+	duration_length = 8 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/animalism/shapeshift
 
