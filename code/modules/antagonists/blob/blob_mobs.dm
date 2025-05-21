@@ -114,6 +114,8 @@
 	var/is_zombie = FALSE
 	///Whether or not this is a fragile spore from Distributed Neurons
 	var/is_weak = FALSE
+	//Whether or not it's a blob variant
+	var/is_variant = FALSE
 
 /mob/living/simple_animal/hostile/blob/blobspore/Initialize(mapload, obj/structure/blob/special/linked_node)
 	. = ..()
@@ -159,6 +161,7 @@
 	if(H.wear_suit)
 		var/obj/item/clothing/suit/armor/A = H.wear_suit
 		maxHealth += A.armor.melee //That zombie's got armor, I want armor!
+	if(is_variant)
 	maxHealth += 40
 	health = maxHealth
 	name = "blob zombie"
@@ -242,6 +245,17 @@
 	melee_damage_upper = 2
 	death_cloud_size = 0
 	is_weak = TRUE
+
+/mob/living/simple_animal/hostile/blob/blobspore/flesh
+	name = "Sporocyst"
+	desc = "A floating spore."
+	is_variant = TRUE
+
+mob/living/simple_animal/hostile/blob/blobspore/weak/flesh
+	name = "Fragile Sporocyst"
+	desc = "A floating, fragile spore."
+	is_variant = TRUE
+
 
 /////////////////
 // BLOBBERNAUT //
