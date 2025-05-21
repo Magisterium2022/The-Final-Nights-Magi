@@ -243,6 +243,16 @@
 	death_cloud_size = 0
 	is_weak = TRUE
 
+/mob/living/simple_animal/hostile/blob/blobspore/flesh
+	name = "Sporocyst"
+	desc = "A floating spore."
+	is_variant = TRUE
+
+mob/living/simple_animal/hostile/blob/blobspore/weak/flesh
+	name = "Fragile Sporocyst"
+	desc = "A floating, fragile spore."
+	is_variant = TRUE
+
 /////////////////
 // BLOBBERNAUT //
 /////////////////
