@@ -161,13 +161,22 @@
 	if(H.wear_suit)
 		var/obj/item/clothing/suit/armor/A = H.wear_suit
 		maxHealth += A.armor.melee //That zombie's got armor, I want armor!
-	maxHealth += 40
-	health = maxHealth
-	name = "blob zombie"
-	desc = "A shambling corpse animated by the blob."
-	mob_biotypes |= MOB_HUMANOID
-	melee_damage_lower += 8
-	melee_damage_upper += 11
+	if(is_variant)
+		maxHealth += 60
+		health = maxHealth
+		name = "shambling corpse"
+		desc = "A shambling corpse animated by vicissitude."
+		mob_biotypes |= MOB_HUMANOID
+		melee_damage_lower += 15
+		melee_damage_upper += 20
+	else
+		maxHealth += 40
+		health = maxHealth
+		name = "blob zombie"
+		desc = "A shambling corpse animated by the blob."
+		mob_biotypes |= MOB_HUMANOID
+		melee_damage_lower += 8
+		melee_damage_upper += 11
 	obj_damage = 20 //now that it has a corpse to puppet, it can properly attack structures
 	environment_smash = ENVIRONMENT_SMASH_STRUCTURES
 	movement_type = GROUND
