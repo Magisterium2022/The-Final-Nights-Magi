@@ -19,7 +19,7 @@
 /obj/projectile/energy/bolt/divine
 	name = "divine bolt"
 	icon_state = "rebar_hydrogen"
-	damage = 35
+	damage = 150
 	speed = 1.6
 	projectile_piercing = PASSMOB|PASSVEHICLE
 	projectile_phasing = ~(PASSMOB|PASSVEHICLE)
@@ -44,7 +44,39 @@
 	stamina = 0
 	eyeblur = 0
 	knockdown = 0
-	slur = 5
+	slur = 0
+
+/obj/projectile/energy/bolt/divine/healing/on_hit(atom/target, blocked = 0, pierce_hit)
+	. = ..()
+	if(!iscarbon(target))
+		return BULLET_ACT_HIT
+	var/mob/living/L = target
+	L.SetSleeping(1 SECONDS)
+	L.adjustFireLoss(-100)
+	L.adjustToxLoss(-100)
+	L.adjustBruteLoss(-100)
+	L.adjustOxyLoss(-100)
+
+	return BULLET_ACT_HIT
+
+/obj/projectile/energy/bolt/divine/burn
+	name = "flaming bolt"
+	icon_state = "rebar_healium"
+	damage = 150
+	dismemberment = 0
+	damage_type = BURN
+	armour_penetration = 100
+	wound_bonus = 20
+	exposed_wound_bonus = -100
+
+/obj/projectile/energy/bolt/divine/burn/on_hit(atom/target, blocked = 0, pierce_hit)
+	. = ..()
+	if(!iscarbon(target))
+		return BULLET_ACT_HIT
+	var/mob/living/L = target
+	L.adjust_fire_stacks(8)
+	L.IgniteMob()
+
 
 /obj/projectile/energy/bolt/divine/destroy
 	name = "destructive bolt"
