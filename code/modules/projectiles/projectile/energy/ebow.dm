@@ -54,3 +54,21 @@
 	damage_type = TOX
 	embed_type = null
 	armour_penetration = 100
+
+/obj/projectile/energy/bolt/divine/destroy/on_hit(atom/target, blocked = 0, pierce_hit)
+	. = ..()
+	if(isliving(target))
+		var/mob/living/victim = target
+		victim.investigate_log("has been dusted by [src].", INVESTIGATE_DEATHS)
+		dust_feedback(target)
+		victim.dust()
+
+	else if(!isturf(target)&& !isliving(target))
+		dust_feedback(target)
+		qdel(target)
+
+	return BULLET_ACT_HIT
+
+/obj/projectile/energy/bolt/divine/destroy/proc/dust_feedback(atom/target)
+	playsound(get_turf(src), 'sound/effects/supermatter.ogg', 10, TRUE)
+	visible_message(span_danger("[target] is hit by [src], turning [target.p_them()] to dust in a brilliant flash of light!"))
