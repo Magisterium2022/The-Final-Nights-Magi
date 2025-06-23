@@ -15,3 +15,42 @@
 
 /obj/projectile/energy/bolt/large
 	damage = 20
+
+/obj/projectile/energy/bolt/divine
+	name = "divine bolt"
+	icon_state = "rebar_hydrogen"
+	damage = 35
+	speed = 1.6
+	projectile_piercing = PASSMOB|PASSVEHICLE
+	projectile_phasing = ~(PASSMOB|PASSVEHICLE)
+	max_pierces = 3
+	phasing_ignore_direct_target = TRUE
+	dismemberment = 0 //goes through clean.
+	damage_type = BRUTE
+	armour_penetration = 40 //very pointy.
+	wound_bonus = 20
+	exposed_wound_bonus = 0
+
+/obj/projectile/energy/bolt/divine/healing
+	name = "healing bolt"
+	icon_state = "rebar_healium"
+	damage = 0
+	dismemberment = 0
+	damage_type = BRUTE
+	armour_penetration = 100
+	wound_bonus = -100
+	exposed_wound_bonus = -100
+	nodamage = TRUE
+	stamina = 0
+	eyeblur = 0
+	knockdown = 0
+	slur = 5
+
+/obj/projectile/energy/bolt/divine/destroy
+	name = "destructive bolt"
+	icon_state = "rebar_supermatter"
+	damage = 0
+	dismemberment = 0
+	damage_type = TOX
+	embed_type = null
+	armour_penetration = 100
