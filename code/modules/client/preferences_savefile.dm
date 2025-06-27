@@ -5,7 +5,7 @@
 //	You do not need to raise this if you are adding new values that have sane defaults.
 //	Only raise this value when changing the meaning/format/name/layout of an existing value
 //	where you would want the updater procs below to run
-#define SAVEFILE_VERSION_MAX	40
+#define SAVEFILE_VERSION_MAX	42
 
 /*
 SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Carn
@@ -86,6 +86,12 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 
 		if (!found_block_movement)
 			LAZYADD(key_bindings["Ctrl"], "block_movement")
+
+	if (current_version < 41)
+		LAZYADD(key_bindings["F"], "toggle_combat_mode")
+		LAZYADD(key_bindings["4"], "toggle_combat_mode")
+	if (current_version < 42)
+		LAZYADD(key_bindings["Space"], "hold_throw_mode")
 
 /datum/preferences/proc/update_character(current_version, savefile/S)
 	if(current_version < 40)
@@ -444,6 +450,7 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	READ_FILE(S["friend"], friend)
 	READ_FILE(S["enemy"], enemy)
 	READ_FILE(S["lover"], lover)
+	READ_FILE(S["show_flavor_text_when_masked"], show_flavor_text_when_masked)
 	READ_FILE(S["flavor_text"], flavor_text)
 	READ_FILE(S["flavor_text_nsfw"], flavor_text_nsfw)
 	READ_FILE(S["ooc_notes"], ooc_notes)
@@ -565,7 +572,7 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	if(!real_name)
 		real_name = random_unique_name(gender)
 //	if(!clane)
-//		var/newtype = GLOB.clanes_list["Brujah"]
+//		var/newtype = GLOB.clanes_list[CLAN_BRUJAH]
 //		clane = new newtype()
 
 	//Prevent Wighting upon joining a round
@@ -793,6 +800,7 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	WRITE_FILE(S["friend"]			, friend)
 	WRITE_FILE(S["enemy"]			, enemy)
 	WRITE_FILE(S["lover"]			, lover)
+	WRITE_FILE(S["show_flavor_text_when_masked"], show_flavor_text_when_masked)
 	WRITE_FILE(S["flavor_text"], flavor_text)
 	WRITE_FILE(S["flavor_text_nsfw"], flavor_text_nsfw)
 	WRITE_FILE(S["ooc_notes"], ooc_notes)
