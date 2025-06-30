@@ -218,7 +218,6 @@
 	if((organ_flags & ORGAN_FAILING))
 		if(!silent)
 			to_chat(owner, span_warning("Your implant seems to be broken!"))
-			to_chat(owner, "<span class='warning'></span>")
 		return FALSE
 	if(speedmod == 0)
 		speedmod = 1
@@ -229,23 +228,18 @@
 		speedmod = 2
 		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan)
 		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
-		to_chat(owner, "<span class='notice'>You increase your implant's acceleration to the second level!</span>")
+		to_chat(owner, span_notice("You increase your implant's acceleration to the second level!"))
 	if(speedmod == 2)
 		speedmod = 3
 		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
 		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
-		to_chat(owner, "<span class='notice'>You increase your implant's acceleration to the third level!</span>")
+		to_chat(owner, span_notice("You increase your implant's acceleration to the second level!"))
 	if(speedmod == 3)
 		speedmod = 4
 		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
 		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
-		to_chat(owner, "<span class='notice'>You increase your implant's acceleration to the fourth level!</span>")
-	else
-		ion_trail.stop()
-		UnregisterSignal(owner, COMSIG_MOVABLE_MOVED)
-		owner.remove_movespeed_modifier(/datum/movespeed_modifier/jetpack/cybernetic)
-		UnregisterSignal(owner, COMSIG_MOVABLE_PRE_MOVE)
-		if(!silent)
-			to_chat(owner, "<span class='notice'>You turn your thrusters set off.</span>")
-		on = FALSE
-	update_appearance()
+		to_chat(owner, span_notice("You increase your implant's acceleration to the fourth level!"))
+	if(speedmod == 4)
+		speedmod = 0
+		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
+		to_chat(owner, span_notice("You disable your speed boosting implant!"))
