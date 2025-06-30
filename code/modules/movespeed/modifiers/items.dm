@@ -13,3 +13,16 @@
 
 /datum/movespeed_modifier/berserk
 	multiplicative_slowdown = -0.2
+
+/datum/movespeed_modifier/sandevistan
+	blacklisted_movetypes = (FLYING|FLOATING)
+	multiplicative_slowdown = -0.25
+
+/datum/movespeed_modifier/sandevistan/two
+	multiplicative_slowdown = -0.5
+
+/datum/movespeed_modifier/sandevistan/three
+	multiplicative_slowdown = -0.75
+
+/datum/movespeed_modifier/sandevistan/four
+	multiplicative_slowdown = -1
