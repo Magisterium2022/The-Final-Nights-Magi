@@ -99,11 +99,11 @@
 			to_chat(usr, span_notice("You switch to firing foam grenades."))
 			grenade_type = /obj/item/grenade/chem_grenade/metalfoam
 		if(12)
-			mode = 1
+			mode = 0
 			to_chat(usr, span_notice("You switch to firing flashbang grenades."))
 			grenade_type = /obj/item/grenade/flashbang
 		else
-			mode = 1
+			mode = 0
 			to_chat(usr, span_notice("The launcher seems to glitch out, before resetting to its default!"))
 			grenade_type = /obj/item/grenade/flashbang
 	playsound(user, 'sound/weapons/empty.ogg', 100, TRUE)
