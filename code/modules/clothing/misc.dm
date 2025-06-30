@@ -48,18 +48,18 @@
 			var/mob/living/carbon/human/C = loc
 			C.update_inv_wear_suit()
 
-/obj/item/clothing/accessory/displacer
+/obj/item/clothing/displacer
 	name = "displacer field"
-	desc = "A small device designed to teleport users out of the way of incoming attacks. Highly unpredictable, can be attached to clothing."
+	desc = "A small device designed to teleport users out of the way of incoming attacks. Highly unpredictable."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "batterer"
 	w_class = ITEM_SIZE_SMALL
 	slot_flags = SLOT_TIE
 
-/obj/item/clothing/accessory/displacer/New()
+/obj/item/clothing/displacer/New()
 	..()
 
-/obj/item/clothing/accessory/displacer/handle_shield(mob/user, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
+/obj/item/clothing/displacer/handle_shield(mob/user, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
 	user.visible_message("<span class='danger'>The displacer flings [user] clear of the attack!</span>")
 	var/list/turfs = new/list()
 	for(var/turf/T in orange(9, user))
