@@ -112,6 +112,7 @@
 /obj/item/gun/energy/launcher/mounted/process_fire(atom/target, mob/living/user, message = TRUE, params = null, zone_override = "", bonus_spread = 0)
 	user.visible_message("<span class='danger'>[user] fired a grenade!</span>", \
 						"<span class='danger'>You fire the grenade launcher!</span>")
+	spawn(selected_grenade)
 	var/obj/item/grenade/F = selected_grenade
 	F.forceMove(user.loc)
 	F.throw_at(target, 30, 2, user)
