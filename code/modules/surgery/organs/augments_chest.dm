@@ -216,30 +216,36 @@
 
 /obj/item/organ/cyberimp/chest/sandevistan/proc/toggle(silent = FALSE)
 	if((organ_flags & ORGAN_FAILING))
-		if(!silent)
-			to_chat(owner, span_warning("Your implant seems to be broken!"))
+		to_chat(owner, span_warning("Your implant seems to be broken!"))
 		return FALSE
-	if(speedmod == 0)
-		speedmod = 1
-		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan)
-		if(!silent)
+	switch(speedmod)
+		if(0)
+			speedmod = 1
+			owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan)
 			to_chat(owner, span_notice("You turn your speed boosting implant on!"))
-	if(speedmod == 1)
-		speedmod = 2
-		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan)
-		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
-		to_chat(owner, span_notice("You increase your implant's acceleration to the second level!"))
-	if(speedmod == 2)
-		speedmod = 3
-		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
-		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
-		to_chat(owner, span_notice("You increase your implant's acceleration to the second level!"))
-	if(speedmod == 3)
-		speedmod = 4
-		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
-		owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
-		to_chat(owner, span_notice("You increase your implant's acceleration to the fourth level!"))
-	if(speedmod == 4)
-		speedmod = 0
-		owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
-		to_chat(owner, span_notice("You disable your speed boosting implant!"))
+		if(1)
+			speedmod = 2
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan)
+			owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
+			to_chat(owner, span_notice("You increase your implant's acceleration to the second level!"))
+		if(2)
+			speedmod = 3
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
+			owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
+			to_chat(owner, span_notice("You increase your implant's acceleration to the second level!"))
+		if(3)
+			speedmod = 4
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
+			owner.add_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
+			to_chat(owner, span_notice("You increase your implant's acceleration to the fourth level!"))
+		if(4)
+			speedmod = 0
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
+			to_chat(owner, span_notice("You disable your speed boosting implant!"))
+		else 
+			speedmod = 0
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan)
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/two)
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/three)
+			owner.remove_movespeed_modifier(/datum/movespeed_modifier/sandevistan/four)
+			to_chat(owner, span_notice("Your implant seems to have malfunctioned, and shuts down!"))
