@@ -40,6 +40,74 @@
 /obj/item/gun/energy/launcher/mounted/dropped()
 	..()
 
+/obj/item/gun/energy/launcher/mounted/ui_action_click(mob/user, actiontype)
+	if(istype(actiontype, /datum/action/item_action/toggle_firemode))
+		grenade_select()
+	else
+		..()
+
+/obj/item/gun/energy/launcher/mounted/proc/grenade_select()
+	var/mob/living/carbon/human/user = usr
+	switch(mode)
+		if(0)
+			mode = 1
+			to_chat(usr, span_notice("You switch to firing smoke grenades."))
+			grenade_type = /obj/item/grenade/smokebomb
+		if(1)
+			mode = 2
+			to_chat(usr, span_notice("You switch to firing tear gas grenades."))
+			grenade_type = /obj/item/grenade/chem_grenade/teargas
+		if(2)
+			mode = 3
+			to_chat(usr, span_notice("You switch to firing EMP grenades."))
+			grenade_type = /obj/item/grenade/empgrenade
+		if(3)
+			mode = 4
+			to_chat(usr, span_notice("You switch to firing hypnotic grenades."))
+			grenade_type = /obj/item/grenade/hypnotic
+		if(4)
+			mode = 5
+			to_chat(usr, span_notice("You switch to firing incendiary grenades."))
+			grenade_type = /obj/item/grenade/chem_grenade/incendiary
+		if(5)
+			mode = 6
+			to_chat(usr, span_notice("You switch to firing high explosive grenades."))
+			grenade_type = /obj/item/grenade/syndieminibomb/concussion
+		if(6)
+			mode = 7
+			to_chat(usr, span_notice("You switch to firing acid grenades."))
+			grenade_type = /obj/item/grenade/chem_grenade/facid
+		if(7)
+			mode = 8
+			to_chat(usr, span_notice("You switch to firing chlorine triflouride grenades."))
+			grenade_type = /obj/item/grenade/chem_grenade/clf3
+		if(8)
+			mode = 9
+			to_chat(usr, span_notice("You switch to firing antigravity grenades."))
+			grenade_type = /obj/item/grenade/antigravity
+		if(9)
+			mode = 10
+			to_chat(usr, span_notice("You switch to firing gluon grenades."))
+			grenade_type = /obj/item/grenade/gluon
+		if(10)
+			mode = 11
+			to_chat(usr, span_notice("You switch to firing fragmentation grenades."))
+			grenade_type = /obj/item/grenade/frag
+		if(11)
+			mode = 12
+			to_chat(usr, span_notice("You switch to firing foam grenades."))
+			grenade_type = /obj/item/grenade/chem_grenade/metalfoam
+		if(12)
+			mode = 1
+			to_chat(usr, span_notice("You switch to firing flashbang grenades."))
+			grenade_type = /obj/item/grenade/flashbang
+		else
+			mode = 1
+			to_chat(usr, span_notice("The launcher seems to glitch out, before resetting to its default!"))
+			grenade_type = /obj/item/grenade/flashbang
+	playsound(user, 'sound/weapons/empty.ogg', 100, TRUE)
+	update_appearance()
+
 /obj/item/gun/energy/launcher/mounted/process_fire(atom/target, mob/living/user, message = TRUE, params = null, zone_override = "", bonus_spread = 0)
 	user.visible_message("<span class='danger'>[user] fired a grenade!</span>", \
 						"<span class='danger'>You fire the grenade launcher!</span>")
