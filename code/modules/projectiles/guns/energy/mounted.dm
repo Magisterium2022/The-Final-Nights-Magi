@@ -31,6 +31,7 @@
 	icon = 'icons/obj/guns/projectile.dmi'
 	icon_state = "riotgun"
 	inhand_icon_state = "riotgun"
+	actions_types = list(/datum/action/item_action/toggle_firemode)
 	fire_sound = 'sound/weapons/gun/general/grenade_launch.ogg'
 	force = 5
 	selfcharge = 1
