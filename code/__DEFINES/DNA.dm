@@ -152,6 +152,7 @@
 #define ORGAN_SLOT_TAIL "tail"
 #define ORGAN_SLOT_PARASITE_EGG "parasite_egg"
 #define ORGAN_SLOT_REGENERATIVE_CORE "hivecore"
+#define ORGAN_SLOT_SPINE "spine"
 
 /// Xenomorph organ slots
 #define ORGAN_SLOT_XENO_PLASMAVESSEL "plasma_vessel"
