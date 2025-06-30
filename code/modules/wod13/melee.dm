@@ -962,3 +962,35 @@
 		L.adjustStaminaLoss(50)
 		L.Jitter(20)
 	return ..()
+
+///AUGMENTS
+
+/obj/item/melee/vampirearms/armblade
+	name = "armblade"
+	desc = "A hefty metal blade, apparently able to fold up inside of an arm."
+	icon = 'code/modules/wod13/weapons.dmi'
+	icon_state = "armblade"
+	force = 35
+	w_class = WEIGHT_CLASS_BULKY
+	block_chance = 40
+	armour_penetration = 40
+	sharpness = SHARP_EDGED
+	attack_verb_continuous = list("slashes", "cuts")
+	attack_verb_simple = list("slash", "cut")
+	hitsound = 'sound/weapons/rapierhit.ogg'
+	wound_bonus = 5
+	bare_wound_bonus = 25
+	resistance_flags = FIRE_PROOF
+	masquerade_violating = FALSE 
+
+/obj/item/melee/vampirearms/armblade/claws
+	name = "wolver claws"
+	desc = "A set of retractible metal claws."
+	icon = 'code/modules/wod13/weapons.dmi'
+	icon_state = "armblade"
+	force = 45
+	w_class = WEIGHT_CLASS_BULKY
+	block_chance = 20
+	armour_penetration = 20
+	wound_bonus = -10
+	bare_wound_bonus = 40
