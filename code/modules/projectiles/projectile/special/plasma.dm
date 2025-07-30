@@ -38,3 +38,10 @@
 	damage = 24
 	range = 7
 	pass_flags = PASSTABLE | PASSGLASS | PASSGRILLE
+
+/obj/projectile/plasma/bolt
+	//A bolt of superheated plasma contained via technomagic. Shorter ranged than most guns, but dangerous as a holdout.
+	name = "plasma beam"
+	damage = 50
+	range = 4
+	pass_flags = PASSTABLE | PASSGLASS | PASSGRILLE
