@@ -155,3 +155,19 @@
 
 /obj/item/gun/energy/pistol/mounted/dropped()
 	..()
+
+/obj/item/gun/energy/pistol/mounted/plasma
+	name = "mounted plasma pistol"
+	desc = "An extremely holdout pistol, you'd probably prefer not to have to use this. This one is designed for the use by Enlightened Citizens."
+	icon = 'icons/obj/guns/energy.dmi'
+	icon_state = "protolaser"
+	inhand_icon_state = "protolaser"
+	force = 5
+	fire_delay = 1
+	selfcharge = 1
+	shaded_charge = FALSE
+	trigger_guard = TRIGGER_GUARD_ALLOW_ALL
+	ammo_type = list(/obj/item/ammo_casing/energy/plasma/bolt)
+
+/obj/item/gun/energy/pistol/mounted/plasma/dropped()
+	..()
