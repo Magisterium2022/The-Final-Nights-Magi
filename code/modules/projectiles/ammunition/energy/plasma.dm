@@ -9,3 +9,8 @@
 	projectile_type = /obj/projectile/plasma/adv
 	delay = 10
 	e_cost = 10
+
+/obj/item/ammo_casing/energy/plasma/bolt
+	projectile_type = /obj/projectile/plasma/bolt
+	delay = 10
+	e_cost = 10
