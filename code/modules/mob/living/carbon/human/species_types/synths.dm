@@ -31,6 +31,16 @@
 	disguise_fail_health = 50
 	changesource_flags = MIRROR_BADMIN | WABBAJACK
 
+/datum/species/synth/terminator
+	name = "HIT Mark V"
+	id = "military_synth"
+	species_traits = list(NOTRANSSTING)
+	inherent_traits = list(TRAIT_ADVANCEDTOOLUSER,TRAIT_VIRUSIMMUNE,TRAIT_NODISMEMBER,TRAIT_NOLIMBDISABLE,TRAIT_NOHUNGER,TRAIT_NOBREATH, TRAIT_UNBONDABLE, TRAIT_TOUGH_FLESH, TRAIT_THERMAL_VISION, TRAIT_MEDICAL_HUD, TRAIT_NEVER_WOUNDED, TRAIT_IGNOREDAMAGESLOWDOWN, TRAIT_MINDSHIELD, TRAIT_NOFLASH, TRAIT_COLD_AURA, TRAIT_ANTIMAGIC, TRAIT_NOSOFTCRIT, TRAIT_NOHARDCRIT)
+	armor = 75
+	punchdamagelow = 40
+	punchdamagehigh = 50
+	changesource_flags = MIRROR_BADMIN
+
 /datum/species/synth/on_species_gain(mob/living/carbon/human/H, datum/species/old_species)
 	..()
 	assume_disguise(old_species, H)
