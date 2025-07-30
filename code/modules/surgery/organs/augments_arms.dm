@@ -27,6 +27,10 @@
 			slot = ORGAN_SLOT_LEFT_ARM_AUG
 		if(BODY_ZONE_R_ARM)
 			slot = ORGAN_SLOT_RIGHT_ARM_AUG
+		if(BODY_ZONE_PRECISE_L_HAND)
+			slot = ORGAN_SLOT_LEFT_HAND_AUG
+		if(BODY_ZONE_PRECISE_R_HAND)
+			slot = ORGAN_SLOT_RIGHT_HAND_AUG
 		else
 			CRASH("Invalid zone for [type]")
 
@@ -285,3 +289,19 @@
 	desc = "A concealed electrical whip."
 	icon_state = "lasombra"
 	contents = newlist(/obj/item/melee/vampirearms/tzimisce/shock)
+
+/obj/item/organ/cyberimp/arm/sword
+	name = "armblade"
+	desc = "A hefty metal blade, apparently able to fold up inside of an arm."
+	icon = 'code/modules/wod13/weapons.dmi'
+	icon_state = "armblade"
+	zone = BODY_ZONE_L_HAND
+	contents = newlist(/obj/item/melee/vampirearms/armblade)
+
+/obj/item/organ/cyberimp/arm/wolver
+	name = "wolver claws"
+	desc = "A set of retractible metal claws."
+	icon = 'icons/obj/items_cyborg.dmi'
+	icon_state = "fingerblades"
+	zone = BODY_ZONE_L_HAND
+	contents = newlist(/obj/item/melee/vampirearms/armblade/claws)
