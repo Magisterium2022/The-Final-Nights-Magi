@@ -300,6 +300,44 @@
 			itemUser.visible_message("<span class='suicide'>[user] looks even further depressed as they realize they do not have a head...and suddenly dies of shame!</span>")
 		return (BRUTELOSS)
 
+/obj/item/vortex_manipulator
+	name = "Vortex Manipulator"
+	desc = "A portable item which rips a pinhole through the fabric of the world, and sends you screaming through it."
+	icon = 'icons/obj/device.dmi'
+	icon_state = "hand_tele"
+	inhand_icon_state = "electronic"
+	worn_icon_state = "electronic"
+	lefthand_file = 'icons/mob/inhands/misc/devices_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/misc/devices_righthand.dmi'
+	throwforce = 0
+	w_class = WEIGHT_CLASS_SMALL
+	throw_speed = 3
+	throw_range = 5
+	custom_materials = list(/datum/material/iron=10000)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 30, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
+	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
+
+/obj/item/vortex_manipulator/attack_self(mob/living/carbon/human/user)
+	var/teleport_to
+	teleport_to = input(caster, "Dragon Nest to travel to:", "BOOYEA", teleport_to) as null|anything in GLOB.teleportlocs
+		if(teleport_to)
+			if(do_mob(caster, caster, delay))
+				var/area/thearea = GLOB.teleportlocs[teleport_to]
+
+				var/list/available_turfs = list()
+				for(var/turf/area_turf in get_area_turfs(thearea.type))
+					if(!area_turf.is_blocked_turf())
+						available_turfs += area_turf
+
+				if(!available_turfs.len)
+					to_chat(caster, "<span class='warning'>There are no available destinations in that area!</span>")
+					return
+
+				if(do_teleport(caster, pick(available_turfs), forceMove = TRUE, channel = TELEPORT_CHANNEL_MAGIC, forced = TRUE))
+					new /obj/effect/temp_visual/impact_effect/shrink(user.location)
+				else
+					to_chat(caster, "<span class='warning'>Something disrupted your travel!</span>")
+
 #undef SOURCE_PORTAL
 #undef DESTINATION_PORTAL
 #undef PORTAL_LOCATION_DANGEROUS
