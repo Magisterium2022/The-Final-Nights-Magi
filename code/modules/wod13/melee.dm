@@ -986,8 +986,8 @@
 /obj/item/melee/vampirearms/armblade/claws
 	name = "wolver claws"
 	desc = "A set of retractible metal claws."
-	icon = 'code/modules/wod13/weapons.dmi'
-	icon_state = "armblade"
+	icon = 'icons/obj/items_cyborg.dmi'
+	icon_state = "fingerblades"
 	force = 45
 	w_class = WEIGHT_CLASS_BULKY
 	block_chance = 20
