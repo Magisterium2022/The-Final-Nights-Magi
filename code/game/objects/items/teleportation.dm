@@ -5,6 +5,8 @@
  * Contains:
  *		Locator
  *		Hand-tele
+ *		Vortex Manipulator
+ *		Advanced Vortex Manipulator
  */
 
 /*
@@ -299,6 +301,72 @@
 		else
 			itemUser.visible_message("<span class='suicide'>[user] looks even further depressed as they realize they do not have a head...and suddenly dies of shame!</span>")
 		return (BRUTELOSS)
+
+/obj/item/vortex_manipulator
+	name = "Vortex Manipulator"
+	desc = "A portable item which rips a pinhole in the fabric of the world, and sends you screaming through it."
+	icon = 'icons/obj/device.dmi'
+	icon_state = "hand_tele"
+	inhand_icon_state = "electronic"
+	worn_icon_state = "electronic"
+	lefthand_file = 'icons/mob/inhands/misc/devices_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/misc/devices_righthand.dmi'
+	throwforce = 0
+	w_class = WEIGHT_CLASS_SMALL
+	throw_speed = 3
+	throw_range = 5
+	custom_materials = list(/datum/material/iron=10000)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 30, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
+	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
+
+/obj/item/vortex_manipulator/attack_self(mob/living/carbon/human/user)
+	var/teleport_to
+	teleport_to = input(caster, "Landmark to travel to:", "TELEPORTING", teleport_to) as null|anything in GLOB.teleportlocs
+		if(teleport_to)
+			if(do_mob(user, user, delay))
+				var/area/thearea = GLOB.teleportlocs[teleport_to]
+
+				var/list/available_turfs = list()
+				for(var/turf/area_turf in get_area_turfs(thearea.type))
+					if(!area_turf.is_blocked_turf())
+						available_turfs += area_turf
+
+				if(!available_turfs.len)
+					to_chat(owner, span_warning("There are no available destinations in that area!")
+					return
+
+				if(do_teleport(user, pick(available_turfs), forceMove = TRUE, channel = TELEPORT_CHANNEL_MAGIC, forced = TRUE))
+					new /obj/effect/temp_visual/impact_effect/shrink(user.location)
+				else
+					to_chat(owner, span_warning("Something disrupted your travel!")
+
+/obj/item/vortex_manipulator/advanced
+	name = "Advanced Vortex Manipulator"
+	desc = "A portable item which rips a pinhole in the fabric of the world, and sends you screaming through it. This one looks extra complicated."
+
+/obj/item/vortex_manipulator/attack_self(mob/living/carbon/human/user)
+	var/teleport_x
+	var/teleport_y
+	var/teleport_z
+	teleport_x = input(caster, "X-coordinates to travel to:", "TELEPORTING", teleport_to) as num|null
+	teleport_y = input(caster, "Y-coordinates to travel to:", "TELEPORTING", teleport_to) as num|null
+	teleport_z = input(caster, "Z-coordinates to travel to:", "TELEPORTING", teleport_to) as num|null
+		if(teleport_x && teleport_y && teleport_z)
+			if(do_mob(user, user, delay))
+				var/turf/T = locate(teleport_x, teleport_y, teleport_z)
+
+				var/list/available_turfs = list()
+				if(!T.is_blocked_turf())
+					available_turfs += T
+
+				if(!available_turfs.len)
+					to_chat(owner, span_warning("There are no available destinations in that area!")
+					return
+
+				if(do_teleport(user, pick(available_turfs), forceMove = TRUE, channel = TELEPORT_CHANNEL_MAGIC, forced = TRUE))
+					new /obj/effect/temp_visual/impact_effect/shrink(user.location)
+				else
+					to_chat(owner, span_warning("Something disrupted your travel!")
 
 #undef SOURCE_PORTAL
 #undef DESTINATION_PORTAL
