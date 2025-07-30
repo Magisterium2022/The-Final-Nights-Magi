@@ -302,7 +302,7 @@
 
 /obj/item/vortex_manipulator
 	name = "Vortex Manipulator"
-	desc = "A portable item which rips a pinhole through the fabric of the world, and sends you screaming through it."
+	desc = "A portable item which rips a pinhole in the fabric of the world, and sends you screaming through it."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "hand_tele"
 	inhand_icon_state = "electronic"
