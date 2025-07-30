@@ -1,12 +1,13 @@
 /obj/item/clothing/shield
-	name = "shielded necklace"
-	desc = "A small amulet which incorporates a powerful force field generator. Its precise mechanism of function is uncertain. Can be worn around the neck."
-	icon = 'icons/obj/device.dmi'
-	icon_state = "rosarius"
+	name = "Strange necklace"
+	desc = "A small amulet which incorporates a powerful force field generator aimed at protecting agaisnt ranged attacks. Its precise mechanism of function is uncertain. Can be worn around the neck."
+	icon = 'icons/mob/clothing/neck.dmi'
+	icon_state = "pillow_tag"
 	w_class = ITEM_SIZE_SMALL
 	slot_flags = SLOT_TIE
 	var/shield_count = 3
 	var/shield_count_max = 3
+	var/shield_toggled = TRUE
 
 /obj/item/clothing/shield/Initialize()
 	. = ..()
@@ -14,6 +15,8 @@
 
 /obj/item/clothing/shield/handle_shield(mob/user, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
 	if(istype(damage_source, /obj/item/projectile))
+		if(!shield_toggled = TRUE)
+			return
 		if(shield_count > 0)
 			var/obj/item/projectile/P = damage_source
 			//var/reflectchance = 100 //Defined here, for if you want to make it have X percent chance of blocking the shot,
@@ -49,17 +52,20 @@
 			C.update_inv_wear_suit()
 
 /obj/item/clothing/displacer
-	name = "displacer field"
+	name = "Strange necklace"
 	desc = "A small device designed to teleport users out of the way of incoming attacks. Highly unpredictable."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "batterer"
 	w_class = ITEM_SIZE_SMALL
 	slot_flags = SLOT_TIE
+	var/displacer_toggled = TRUE
 
 /obj/item/clothing/displacer/New()
 	..()
 
 /obj/item/clothing/displacer/handle_shield(mob/user, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
+	if(!displacer_toggled = TRUE)
+		return
 	user.visible_message("<span class='danger'>The displacer flings [user] clear of the attack!</span>")
 	var/list/turfs = new/list()
 	for(var/turf/T in orange(9, user))
