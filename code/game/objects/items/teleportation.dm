@@ -5,6 +5,7 @@
  * Contains:
  *		Locator
  *		Hand-tele
+ *		Vortex Manipulator
  */
 
 /*
@@ -321,7 +322,7 @@
 	var/teleport_to
 	teleport_to = input(caster, "Landmark to travel to:", "TELEPORTING", teleport_to) as null|anything in GLOB.teleportlocs
 		if(teleport_to)
-			if(do_mob(caster, caster, delay))
+			if(do_mob(user, user, delay))
 				var/area/thearea = GLOB.teleportlocs[teleport_to]
 
 				var/list/available_turfs = list()
@@ -330,13 +331,41 @@
 						available_turfs += area_turf
 
 				if(!available_turfs.len)
-					to_chat(caster, "<span class='warning'>There are no available destinations in that area!</span>")
+					to_chat(owner, span_warning("There are no available destinations in that area!")
 					return
 
-				if(do_teleport(caster, pick(available_turfs), forceMove = TRUE, channel = TELEPORT_CHANNEL_MAGIC, forced = TRUE))
+				if(do_teleport(user, pick(available_turfs), forceMove = TRUE, channel = TELEPORT_CHANNEL_MAGIC, forced = TRUE))
 					new /obj/effect/temp_visual/impact_effect/shrink(user.location)
 				else
-					to_chat(caster, "<span class='warning'>Something disrupted your travel!</span>")
+					to_chat(owner, span_warning("Something disrupted your travel!")
+
+/obj/item/vortex_manipulator/advanced
+	name = "Advanced Vortex Manipulator"
+	desc = "A portable item which rips a pinhole in the fabric of the world, and sends you screaming through it. This one looks extra complicated."
+
+/obj/item/vortex_manipulator/attack_self(mob/living/carbon/human/user)
+	var/teleport_x
+	var/teleport_y
+	var/teleport_z
+	teleport_x = input(caster, "X-coordinates to travel to:", "TELEPORTING", teleport_to) as num|null
+	teleport_y = input(caster, "Y-coordinates to travel to:", "TELEPORTING", teleport_to) as num|null
+	teleport_z = input(caster, "Z-coordinates to travel to:", "TELEPORTING", teleport_to) as num|null
+		if(teleport_x && teleport_y && teleport_z)
+			if(do_mob(user, user, delay))
+				var/turf/T = locate(teleport_x, teleport_y, teleport_z)
+
+				var/list/available_turfs = list()
+				if(!T.is_blocked_turf())
+					available_turfs += T
+
+				if(!available_turfs.len)
+					to_chat(owner, span_warning("There are no available destinations in that area!")
+					return
+
+				if(do_teleport(user, pick(available_turfs), forceMove = TRUE, channel = TELEPORT_CHANNEL_MAGIC, forced = TRUE))
+					new /obj/effect/temp_visual/impact_effect/shrink(user.location)
+				else
+					to_chat(owner, span_warning("Something disrupted your travel!")
 
 #undef SOURCE_PORTAL
 #undef DESTINATION_PORTAL
