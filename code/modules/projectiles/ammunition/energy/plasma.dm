@@ -12,5 +12,5 @@
 
 /obj/item/ammo_casing/energy/plasma/bolt
 	projectile_type = /obj/projectile/plasma/bolt
-	delay = 10
+	delay = 5
 	e_cost = 10
