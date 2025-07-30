@@ -319,7 +319,7 @@
 
 /obj/item/vortex_manipulator/attack_self(mob/living/carbon/human/user)
 	var/teleport_to
-	teleport_to = input(caster, "Dragon Nest to travel to:", "BOOYEA", teleport_to) as null|anything in GLOB.teleportlocs
+	teleport_to = input(caster, "Landmark to travel to:", "TELEPORTING", teleport_to) as null|anything in GLOB.teleportlocs
 		if(teleport_to)
 			if(do_mob(caster, caster, delay))
 				var/area/thearea = GLOB.teleportlocs[teleport_to]
