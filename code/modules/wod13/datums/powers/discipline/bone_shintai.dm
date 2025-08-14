@@ -13,7 +13,7 @@
 //CORPSE SKIN	
 /datum/discipline_power/bone_shintai/corpse_skin
 	name = "Corpse Skin"
-	desc = "Place a chosen target, including yourself, into a corpse-like state."
+	desc = "Turn more corpselike, improving resistance to physical attacks."
 
 	level = 1
 	check_flags = DISC_CHECK_CONSCIOUS
@@ -51,3 +51,25 @@
 	caster.dna.species.limbs_id = initial_limbs_id
 	caster.update_body()
 	REMOVE_TRAIT(caster, TRAIT_UNMASQUERADE, TRAUMA_TRAIT)
+
+//WHITE TIGER CORPSE
+/datum/discipline_power/bone_shintai/white_tiger_corpse
+	name = "White Tiger Corpse"
+	desc = "Fade from view for a time."
+
+	level = 2
+	check_flags = DISC_CHECK_CONSCIOUS
+	yin_cost = 2
+
+	toggled = TRUE
+
+	hostile = FALSE
+	violates_masquerade = FALSE
+
+/datum/discipline_power/bone_shintai/white_tiger_corpse/activate(mob/living/target) //Visceratika does it this way, and Auspex is apparently being reworked to fix the way auras are shown. 
+	. = ..()
+	owner.alpha = 10
+
+/datum/discipline_power/bone_shintai/white_tiger_corpse/deactivate()
+	. = ..()
+	owner.alpha = 255
