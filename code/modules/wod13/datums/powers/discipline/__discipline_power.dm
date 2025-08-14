@@ -10,11 +10,23 @@
 	/// Bitflags determining the requirements to cast this power
 	var/check_flags = DISC_CHECK_CONSCIOUS | DISC_CHECK_CAPABLE
 	/// How many blood points this power costs to activate
-	var/vitae_cost = 1
+	var/vitae_cost = 0
+	///Cost in yin points of activating this Discipline.
+	var/cost_yin = 0
+	///Cost in yang points of activating this Discipline.
+	var/cost_yang = 0
+	///Cost in demon points of activating this Discipline.
+	var/cost_demon = 0
+	///Cost in demon points of activating this Discipline.
+	var/cost_demon = 0
 	/// Bitflags determining what types of entities this power is allowed to target. NONE if self-targeting only.
 	var/target_type = NONE
 	/// How many tiles away this power can be used from.
 	var/range = 0
+	///Is this a Kindred Discipline
+	var/kindred_discipline = FALSE
+	///Is this a Kuei-Jin Discipline (Shintai)?
+	var/chi_discipline = FALSE
 
 	/* EXTRA BEHAVIOUR ON ACTIVATION AND DEACTIVATION */
 	/// Sound file that plays to the user when this power is activated.
