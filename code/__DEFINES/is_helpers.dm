@@ -95,6 +95,7 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 #define iscathayan(A) (is_species(A,/datum/species/kuei_jin))
 #define isghoul(A) (is_species(A,/datum/species/ghoul))
 #define isgarou(A) (is_species(A,/datum/species/garou))
+#define iscorax(A) (is_species(A,/datum/species/garou/corax))
 
 //more carbon mobs
 
@@ -106,7 +107,7 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 
 #define iscorax(A) (istype(A, /mob/living/carbon/werewolf/corax))
 
-#define iscorvid(A) (istype(A, /mob/living/carbon/werewolf/lupus/corvid))
+#define iscorvid(A) (istype(A, /mob/living/carbon/werewolf/corvid))
 
 #define iscoraxcrinos(A) (istype(A, /mob/living/carbon/werewolf/corax/corax_crinos)) //not sure if necessary, not taking chances
 
