@@ -161,3 +161,80 @@
 		/datum/action/gift/suns_guard = 3
 	)
 	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe
+	var/name
+	var/desc
+	var/list/tribal_gifts = list()
+	var/tribe_keys
+	var/tribe_trait
+
+/datum/corax_tribe/chasers
+	name = "Chasers"
+	desc = "Less of a true Tribe, and more of a loose category. Chasers explore and discover all about the world around them. Limitless freedom - and limitless opportunities to get into trouble!"
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe/leshy
+	name = "Leshy"
+	desc = "Talkative tricksters, with a paranoid streak - Leshy often come from Eastern Europe, and have a higher percentage of Corax-born than most."
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe/hermetic_swift_light
+	name = "Hermetic Order of Swift Light"
+	desc = "Dutiful information-brokers and technology experts, these Corax can tell you almost anything - for a price."
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe/gulls_of_battle
+	name = "Gulls of Battle"
+	desc = "Airborne warriors and battle-junkies, their name stems back to the vikings. If you want to find a fight, follow them."
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe/murders_daughters
+	name = "Murder's Daughters"
+	desc = "Female-only troublemakers, they hope to become the next member of The Morrigan, typically through extreme violence."
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe/sun_lost
+	name = "The Sun Lost"
+	desc = "These lost souls have abandoned all they possessed in life, and typically spend their time in the Umbra. Mad and knowledgable, in equal measure."
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
+
+/datum/corax_tribe/tulugaq
+	name = "Tulugaq"
+	desc = "Trickster's tricksters, deception and trickery are highly valued among this group. They're big fans of jokes."
+	tribal_gifts = list(
+		/datum/action/gift/eye_drink = 1,
+		/datum/action/gift/smooth_move = 2,
+		/datum/action/gift/suns_guard = 3
+	)
+	tribe_trait = TRAIT_CORAX
