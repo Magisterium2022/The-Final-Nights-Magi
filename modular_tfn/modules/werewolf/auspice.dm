@@ -17,7 +17,7 @@
 	var/mob/living/carbon/werewolf/lupus/lupus = C.transformator.lupus_form?.resolve()
 	var/mob/living/carbon/werewolf/crinos/crinos = C.transformator.crinos_form?.resolve()
 	var/mob/living/carbon/werewolf/corax/corax_crinos/cor_crinos = C.transformator.corax_form?.resolve()
-	var/mob/living/carbon/werewolf/lupus/corvid/corvid = C.transformator.corvid_form?.resolve()
+	var/mob/living/carbon/werewolf/corvid/corvid = C.transformator.corvid_form?.resolve()
 	lupus?.auspice = src
 	crinos?.auspice = src
 	cor_crinos?.auspice = src
@@ -142,3 +142,9 @@
 	desc = "The Ragabash born under the waxing new moon is usually light-hearted and capricious, while one born under the waning new moon has a slightly more wicked and ruthless streak. It's a rare Ragabash indeed that lacks a keen wit and the capacity to find some humor in any situation, no matter how bleak. Many other werewolves are slow to take the Ragabash seriously, though, as it's difficult to tell the difference between a New Moon's mockery that points out a grievous flaw in a plan and similar mockery that simply amuses him. Sometimes a Ragabash points out that the emperor has no clothes - but sometimes they're the first to cry wolf, so to speak."
 	start_rage = 1
 	gifts = list(/datum/action/gift/blur_of_the_milky_eye, /datum/action/gift/open_seal, /datum/action/gift/infectious_laughter)
+
+/datum/auspice/corax
+	name = "Corax"
+	desc = "Corax lack Auspices in the manner of Garou and other changing breeds, being instead self-sufficient specialists. They are none the lesser for it, however, and one shuld be wary to never underestimate their guile."
+	start_rage = 1
+	gifts = list(/datum/action/gift/sense_wyrm, /datum/action/gift/eye_drink, /datum/action/gift/smooth_move, /datum/action/gift/suns_guard, /datum/action/gift/open_seal, /datum/action/gift/infectious_laughter)
