@@ -22,14 +22,8 @@
 /mob/living/carbon/werewolf/lupus/Initialize()
 	. = ..()
 	AddComponent(/datum/component/footstep, FOOTSTEP_MOB_CLAW, 0.5, -11)
-	if(!iscorvid(src))
-		var/datum/action/gift/hispo/hispo = new()
-		hispo.Grant(src)
-	else
-		var/datum/action/innate/togglecorvidflight/toggleflight = new()
-		toggleflight.Grant(src)
-		var/datum/action/fly_upper/fly_up = new()
-		fly_up.Grant(src)
+	var/datum/action/gift/hispo/hispo = new()
+	hispo.Grant(src)
 
 /mob/living/carbon/werewolf/lupus/can_hold_items(obj/item/I)
 	return ((I.w_class <= WEIGHT_CLASS_SMALL) && ..())
@@ -86,7 +80,7 @@
 				adjust_veil(-1,threshold = 4)
 	. = ..()
 
-/mob/living/carbon/werewolf/lupus/corvid // yes, this is a subtype of lupus, god help us all
+/mob/living/carbon/werewolf/corvid // yes, this is a subtype of lupus, god help us all
 	name = "corvid"
 	icon_state = "black"
 	icon = 'code/modules/wod13/corax_corvid.dmi'
@@ -98,7 +92,15 @@
 	health = 100
 	maxHealth = 100 // I predict that the sprites will be hell to click, no extra HP compared to homid
 
-/mob/living/carbon/werewolf/lupus/corvid/can_hold_items(obj/item/I)
+/mob/living/carbon/werewolf/lupus/Initialize()
+	. = ..()
+	AddComponent(/datum/component/footstep, FOOTSTEP_MOB_CLAW, 0.5, -11)
+	var/datum/action/innate/togglecorvidflight/toggleflight = new()
+	toggleflight.Grant(src)
+	var/datum/action/fly_upper/fly_up = new()
+	fly_up.Grant(src)
+
+/mob/living/carbon/werewolf/corvid/can_hold_items(obj/item/I)
 	// Look at them, do you think they can pick up flashlights?
 	return ((I.w_class <= WEIGHT_CLASS_TINY) && ..())
 
@@ -110,7 +112,7 @@
 	button_icon_state = "flight"
 
 /datum/action/innate/togglecorvidflight/Trigger(trigger_flags)
-	var/mob/living/carbon/werewolf/lupus/corvid/corvid = owner
+	var/mob/living/carbon/werewolf/corvid/corvid = owner
 	if (!(corvid.movement_type & FLYING))
 		to_chat(corvid, span_notice("You beat your wings and begin to hover gently above the ground..."))
 		corvid.set_resting(FALSE, TRUE)
@@ -129,3 +131,34 @@
 	flight_overlay.plane = ABOVE_LIGHTING_PLANE
 	flight_overlay.layer = ABOVE_LIGHTING_LAYER
 	corvid.add_overlay(flight_overlay)
+
+/mob/living/carbon/werewolf/corvid/update_icons()
+	cut_overlays()
+
+	var/laid_down = FALSE
+
+	if(stat == UNCONSCIOUS || IsSleeping() || stat == HARD_CRIT || stat == SOFT_CRIT || IsParalyzed() || stat == DEAD || body_position == LYING_DOWN)
+		icon_state = wyrm_tainted ? "spiral[sprite_color]_rest" : "[sprite_color]_rest"
+		laid_down = TRUE
+	else
+		icon_state = wyrm_tainted ? "spiral[sprite_color]" : "[sprite_color]"
+	if(HAS_TRAIT(src, TRAIT_MOVE_FLYING))
+		icon_state = wyrm_tainted ? "spiral[sprite_color]_flying" :"[sprite_color]_flying"
+
+	switch(getFireLoss()+getBruteLoss())
+		if(25 to 75)
+			var/mutable_appearance/damage_overlay = mutable_appearance(icon, "damage1[laid_down ? "_rest" : ""]")
+			add_overlay(damage_overlay)
+		if(75 to 150)
+			var/mutable_appearance/damage_overlay = mutable_appearance(icon, "damage2[laid_down ? "_rest" : ""]")
+			add_overlay(damage_overlay)
+		if(150 to INFINITY)
+			var/mutable_appearance/damage_overlay = mutable_appearance(icon, "damage3[laid_down ? "_rest" : ""]")
+			add_overlay(damage_overlay)
+
+	var/mutable_appearance/eye_overlay = mutable_appearance(icon, "eyes[laid_down ? "_rest" : HAS_TRAIT(src, TRAIT_MOVE_FLYING) ? "_flying" : ""]")
+	eye_overlay.color = sprite_eye_color
+	eye_overlay.plane = ABOVE_LIGHTING_PLANE
+	eye_overlay.layer = ABOVE_LIGHTING_LAYER
+	add_overlay(eye_overlay)
+	. = ..()
