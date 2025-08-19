@@ -139,15 +139,11 @@
 
 	var/mob/living/carbon/werewolf/lupus/lupus = C.transformator.lupus_form?.resolve()
 	var/mob/living/carbon/werewolf/crinos/crinos = C.transformator.crinos_form?.resolve()
-	var/mob/living/carbon/werewolf/lupus/corvid/corvid = C.transformator.corvid_form?.resolve()
-	var/mob/living/carbon/werewolf/corax/corax_crinos/corax_crinos = C.transformator.corax_form?.resolve()
 
 	//garou resist vampire bites better than mortals
 	RegisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
 	RegisterSignal(lupus, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
 	RegisterSignal(crinos, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
-	RegisterSignal(corvid, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
-	RegisterSignal(corax_crinos, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
 
 /datum/species/garou/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
 	. = ..()
@@ -210,3 +206,60 @@
 
 	if(isgarou(being_bitten) || iswerewolf(being_bitten))
 		return COMPONENT_RESIST_VAMPIRE_KISS
+
+/datum/species/garou/corax
+	name = "Were-bird"
+	id = "corax"
+	default_color = "FFFFFF"
+	toxic_food = PINEAPPLE
+	species_traits = list(EYECOLOR, HAIR, FACEHAIR, LIPS, HAS_FLESH, HAS_BONE)
+	inherent_traits = list(TRAIT_ADVANCEDTOOLUSER, TRAIT_VIRUSIMMUNE, TRAIT_PERFECT_ATTACKER)
+	use_skintones = TRUE
+	limbs_id = "human"
+	wings_icon = "Angel"
+	brutemod = 1
+	heatmod = 1
+	burnmod = 1
+	dust_anim = "dust-h"
+	punchdamagelow = 10
+	punchdamagehigh = 20
+	whitelisted = TRUE
+	selectable = TRUE
+	species_language_holder = /datum/language_holder/corax
+
+/datum/species/garou/corax/on_species_gain(mob/living/carbon/human/C)
+	. = ..()
+	C.update_body(0)
+	C.last_experience = world.time+3000
+	var/datum/action/garouinfo/infor = new()
+	infor.host = C
+	infor.Grant(C) 
+	var/datum/action/gift/rage_heal/GH = new()
+	GH.Grant(C)
+	var/datum/action/gift/howling/howl = new()
+	howl.Grant(C)
+	C.transformator = new(C)
+	C.transformator.human_form = WEAKREF(C)
+
+	var/mob/living/carbon/werewolf/corax/corvid/corvid = C.transformator.corvid_form?.resolve()
+	var/mob/living/carbon/werewolf/corax/corax_crinos/corax_crinos = C.transformator.corax_form?.resolve()
+
+	//Corax resist vampire bites better than mortals
+	RegisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
+	RegisterSignal(corvid, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
+	RegisterSignal(corax_crinos, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_garou_bitten))
+
+
+/datum/species/garou/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
+	. = ..()
+	var/mob/living/carbon/werewolf/lupus/corvid/corvid = C.transformator.corvid_form?.resolve()
+	var/mob/living/carbon/werewolf/corax/corax_crinos/corax_crinos = C.transformator.corax_form?.resolve()
+
+	UnregisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED)
+	UnregisterSignal(corvid, COMSIG_MOB_VAMPIRE_SUCKED)
+	UnregisterSignal(corax_crinos, COMSIG_MOB_VAMPIRE_SUCKED)
+
+	for(var/datum/action/garouinfo/VI in C.actions)
+		VI.Remove(C)
+	for(var/datum/action/gift/G in C.actions)
+		G.Remove(C)
