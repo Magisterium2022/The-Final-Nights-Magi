@@ -29,3 +29,19 @@
 	)
 	icon_state = "garou"
 	default_priority = 90
+
+/datum/language/corax_tongue
+	name = "Corax Tongue"
+	desc = "A high and shrill language also known as 'Raventongue', the language of the Corax capable of being learned and spoken by Corax. It is hard to speak in human form." //Special language, not actually mentioned in the books, but it makes sense.
+	key = "t"
+	flags = TONGUELESS_SPEECH
+	space_chance = 40
+	syllables = list(
+		"wa", "sq", "wk", "ah", "an", "ee", "aw", "ap", "lk", "ro",
+		"li", "me", "ad", "he", "ah", "um", "co", "ga", "gar", "fa",
+		"el", "ra", "ia", "of", "os", "ra", "ta", "na", "ga", "ho",
+		"lu", "lu", "fe", "az", "mo", "ash", "ar", "at", "ao", "an",
+		"aa", "jo", "da", "ak", "pe", "su", "yo", "ye", "eh", "ka"
+	)
+	icon_state = "garou"
+	default_priority = 90
