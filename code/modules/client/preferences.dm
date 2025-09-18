@@ -39,6 +39,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	var/see_rc_emotes = TRUE
 	//Клан вампиров
 	var/datum/vampire_clan/clan
+	var/datum/numina_pattern/numina
 	var/datum/morality/morality_path = new /datum/morality/humanity()
 	// Custom Keybindings
 	var/list/key_bindings = list()
@@ -285,6 +286,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	glory = initial(glory)
 	wisdom = initial(wisdom)
 	clan = GLOB.vampire_clans[/datum/vampire_clan/brujah]
+	numina = GLOB.numina_clans[/datum/numina_pattern/mundane]
 	qdel(morality_path)
 	morality_path = new /datum/morality/humanity()
 	discipline_types = list()
@@ -758,7 +760,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					if(generation <= 7)
 						dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"][discipline_level > 5 ? "•" : "o"][discipline_level > 6 ? "•" : "o"][discipline_level > 7 ? "•" : "o"][discipline_level > 8 ? "•" : "o"][discipline_level > 9 ? "•" : "o"]([discipline_level])"
 					else
-						dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"])"				
+						dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"])"
 					if((player_experience >= cost) && (discipline_level != max_discipline_level))
 						dat += "<a href='byond://?_src_=prefs;preference=discipline;task=input;upgradediscipline=[i]'>Learn ([cost])</a><BR>"
 					else
@@ -775,7 +777,33 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						qdel(discipline)
 					if (possible_new_disciplines.len && (player_experience >= 10))
 						dat += "<a href='byond://?_src_=prefs;preference=newdiscipline;task=input'>Learn a new Discipline (10)</a><BR>"
+			if(pref_species.name == "Human")
+				dat += "<h2>[make_font_cool("GIFTS")]</h2>"
+				dat += "<b>Numina:</b> <a href='byond://?_src_=prefs;preference=numina;task=input'>[numina.name]</a><BR>"
+				dat += "<b>Description:</b> [numina.desc]<BR>"
+				dat += "<b>Curse:</b> [numina.curse]<BR>"
+				dat += "<h2>[make_font_cool("POWERS")]</h2>"
 
+				for (var/i in 1 to discipline_types.len)
+					var/discipline_type = discipline_types[i]
+					var/datum/discipline/numina/discipline = new discipline_type
+					var/discipline_level = discipline_levels[i]
+
+					var/cost
+					if (discipline_level <= 0)
+						cost = 100
+					else if (numina.numina_disciplines.Find(discipline_type))
+						cost = discipline_level * 5
+					else
+						cost = discipline_level * 7
+
+					dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"]([discipline_level])"
+					if((player_experience >= cost) && (discipline_level != 5))
+						dat += "<a href='byond://?_src_=prefs;preference=discipline;task=input;upgradediscipline=[i]'>Learn ([cost])</a><BR>"
+					else
+						dat += "<BR>"
+					dat += "-[discipline.desc]<BR>"
+					qdel(discipline)
 			if(pref_species.name == "Ghoul")
 				for (var/i in 1 to discipline_types.len)
 					var/discipline_type = discipline_types[i]
@@ -2630,7 +2658,33 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 							clan_accessory = null
 						else
 							clan_accessory = pick(clan.accessories)
+				//TFN EDIT - NUMINA SYSTEM //////////////////////////////////////////////////////////
+				if("numina")
+					if(slotlocked || !(pref_species.id == "human"))
+						return
 
+					if(tgui_alert(user, "Are you sure you want to change your Numina? This will reset your Powers.", "Confirmation", list("Yes", "No")) != "Yes")
+						return
+
+					// Create a list of Numina that can be played by anyone or this user has a whitelist for
+					var/list/available_numina = list()
+					for(var/adding_numina in GLOB.numina_clans)
+						var/datum/numina_pattern/checking_numina = GLOB.numina_clans[adding_numina]
+						if(checking_numina.whitelisted && !SSwhitelists.is_whitelisted(user.ckey, checking_numina.name))
+							continue
+						available_numina += checking_numina
+					var/result = tgui_input_list(user, "Select a Numina", "Numina Selection", sort_list(available_numina))
+					if(!result)
+						return
+					numina = result
+
+					discipline_types = list()
+					discipline_levels = list()
+
+					for(var/i in 1 to length(numina.numina_disciplines))
+						discipline_types += numina.numina_disciplines[i]
+						discipline_levels += 1
+				//TFN EDIT - NUMINA SYSTEM //////////////////////////////////////////////////////////
 				if("digitigradelegs")
 					if(clan.name != "Gargoyle")
 						return
@@ -2744,6 +2798,22 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 							cost = discipline_level * 6
 						else if (clan.clan_disciplines.Find(discipline_types[i]))
 							cost = discipline_level * 5
+
+						if ((player_experience < cost) || (discipline_level >= max_discipline_level))
+							return
+
+						player_experience -= cost
+						experience_used_on_character += cost
+						discipline_levels[i] = min(max_discipline_level, max(1, discipline_levels[i] + 1))
+					if(pref_species.id == "human")
+						var/i = text2num(href_list["upgradediscipline"])
+
+						var/discipline_level = discipline_levels[i]
+						var/max_discipline_level = 5
+
+						var/cost = discipline_level * 100
+						if (discipline_level <= 0)
+							cost = 100
 
 						if ((player_experience < cost) || (discipline_level >= max_discipline_level))
 							return
@@ -3022,9 +3092,18 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						var/newtype = GLOB.species_list[result]
 						pref_species = new newtype()
 						switch(pref_species.id)
-							if("ghoul","human","kuei-jin")
+							if("ghoul","kuei-jin")
 								discipline_types.Cut()
 								discipline_levels.Cut()
+							// TFN EDIT - NUMINA SYSTEM //////////////////////////////////////////////////////////
+							if("human")
+								numina = GLOB.numina_clans[/datum/numina_pattern/mundane]
+								discipline_types.Cut()
+								discipline_levels.Cut()
+								for (var/i in 1 to length(numina.numina_disciplines))
+									discipline_types += numina.numina_disciplines[i]
+									discipline_levels += 1
+							// TFN EDIT - NUMINA SYSTEM //////////////////////////////////////////////////////////
 							if("kindred")
 								clan = GLOB.vampire_clans[/datum/vampire_clan/brujah]
 								discipline_types.Cut()
@@ -3726,6 +3805,10 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		character.max_yang_chi = 3
 		character.yin_chi = 2
 		character.max_yin_chi = 2
+	//TFN EDIT - NUMINA SYSTEM
+	if (pref_species.name == "Human")
+		character.set_numina(numina, TRUE)
+	// TFN EDIT - NUMINA SYSTEM
 
 	if(pref_species.name == "Vampire")
 		character.skin_tone = get_vamp_skin_color(skin_tone)
