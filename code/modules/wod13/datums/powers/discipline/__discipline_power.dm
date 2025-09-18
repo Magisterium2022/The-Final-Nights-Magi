@@ -15,10 +15,12 @@
 	var/cost_yin = 0
 	///Cost in yang points of activating this Discipline.
 	var/cost_yang = 0
-	///Cost in demon points of activating this Discipline.
+	///Cost in demon chi of activating this Discipline.
 	var/cost_demon = 0
-	///Cost in tainted points of activating this Discipline.
-	var/cost_tainted = 0
+	///Cost in tainted yin of activating this Discipline.
+	var/cost_tainted_yin = 0
+	///Cost in tainted yang of activating this Discipline.
+	var/cost_tainted_yang = 0
 	/// Bitflags determining what types of entities this power is allowed to target. NONE if self-targeting only.
 	var/target_type = NONE
 	/// How many tiles away this power can be used from.
