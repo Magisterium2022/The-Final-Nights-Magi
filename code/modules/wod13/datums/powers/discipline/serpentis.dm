@@ -34,6 +34,12 @@
 	duration_length = 0.5 SECONDS
 	cooldown_length = 5 SECONDS
 
+/datum/discipline_power/serpentis/the_eyes_of_the_serpent/pre_activation_checks(mob/living/target)
+	if(issupernatural(target))
+		if(!SSroll.storyteller_roll((target.st_get_stat(STAT_TEMPORARY_WILLPOWER)), 9, FALSE, list(target, owner)))
+			return FALSE
+	return TRUE
+
 /datum/discipline_power/serpentis/the_eyes_of_the_serpent/can_activate_untargeted(alert)
 	. = ..()
 	if (owner?.is_eyes_covered())
@@ -110,7 +116,8 @@
 
 	level = 3
 	check_flags = DISC_CHECK_CAPABLE | DISC_CHECK_IMMOBILE | DISC_CHECK_LYING
-
+	vitae_cost = 1
+	willpower_cost = 1
 	violates_masquerade = TRUE
 
 	duration_length = 5 SECONDS
@@ -129,26 +136,32 @@
 
 	level = 4
 	check_flags = DISC_CHECK_CAPABLE | DISC_CHECK_IMMOBILE | DISC_CHECK_LYING
-	vitae_cost = 2
+	vitae_cost = 1
 
 	violates_masquerade = TRUE
 
-	duration_length = 15 SECONDS
 	cooldown_length = 30 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/cobra/BC
+
+
+/datum/discipline_power/serpentis/the_form_of_the_cobra/pre_activation_checks()
+	. = ..()
+	if(HAS_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING))
+		to_chat(owner, span_warning("YOU ALREADY ARE TRANSFORMING!"))
+		return FALSE
+	else
+		ADD_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+	to_chat(owner, span_warning("You begin transforming..."))
+	if (do_after(owner, 6 SECONDS, timed_action_flags = (IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM )))
+		REMOVE_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+		return TRUE
 
 /datum/discipline_power/serpentis/the_form_of_the_cobra/activate()
 	. = ..()
 	if(!BC)
 		BC = new(owner)
 	BC.Shapeshift(owner)
-
-/datum/discipline_power/serpentis/the_form_of_the_cobra/deactivate()
-	. = ..()
-	BC.Restore(BC.myshape)
-	owner.Stun(1.5 SECONDS)
-	owner.do_jitter_animation(3 SECONDS)
 
 /obj/effect/proc_holder/spell/targeted/shapeshift/cobra
 	name = "Cobra"
@@ -172,8 +185,8 @@
 	health = 300
 	butcher_results = list(/obj/item/stack/human_flesh = 20)
 	harm_intent_damage = 5
-	melee_damage_lower = 50
-	melee_damage_upper = 50
+	melee_damage_lower = 30
+	melee_damage_upper = 30
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/slash.ogg'

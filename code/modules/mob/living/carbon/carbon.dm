@@ -74,6 +74,13 @@
 	for(var/datum/surgery/S in surgeries)
 		if(body_position == LYING_DOWN || !S.lying_required)
 			var/list/modifiers = params2list(params)
+			// TFN ADDITION - Tzimisce Rework part 2
+			if((iskindred(user)) && !user.combat_mode)
+				var/mob/living/carbon/human/H = user
+				var/datum/species/kindred/H_species = H?.dna.species
+				if((H_species?.get_discipline(/datum/discipline/vicissitude)) && S.next_step(user, modifiers))
+					return 1
+			// TFN ADDITION END - Tzimisce Rework part 2	 	
 			if((S.self_operable || user != src) && !user.combat_mode)
 				if(S.next_step(user, modifiers))
 					return 1
@@ -210,9 +217,9 @@
 
 	var/mob/living/H = src
 	var/mob/living/carbon/carbon_mob = src
-	var/physique = H.get_total_physique()
-	var/dexterity = H.get_total_dexterity()
-	var/athletics = H.get_total_athletics()
+	var/physique = H.st_get_stat(STAT_STRENGTH)
+	var/dexterity = H.st_get_stat(STAT_DEXTERITY)
+	var/athletics = H.st_get_stat(STAT_ATHLETICS)
 
 	if(HAS_TRAIT(H, TRAIT_IMMOBILIZED))
 		return

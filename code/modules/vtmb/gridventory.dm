@@ -895,6 +895,10 @@ VENTORY!
 	grid_width = 2 GRID_BOXES
 	grid_height = 5 GRID_BOXES
 
+/obj/item/melee/vampirearms/spear
+	grid_width = 2 GRID_BOXES
+	grid_height = 8 GRID_BOXES
+
 /obj/item/melee/vampirearms/baseball
 	grid_width = 3 GRID_BOXES
 	grid_height = 1 GRID_BOXES
@@ -1158,3 +1162,7 @@ VENTORY!
 /obj/item/ammo_box/magazine/vamp762x51PSG1
 	grid_width = 1 GRID_BOXES
 	grid_height = 2 GRID_BOXES
+
+/obj/item/battering_ram
+	grid_width = 8 GRID_BOXES
+	grid_height = 3 GRID_BOXES

@@ -1031,14 +1031,14 @@
 	owner.add_movespeed_modifier(/datum/movespeed_modifier/diablerie_high)
 	if(!HAS_TRAIT(owner, TRAIT_IGNOREDAMAGESLOWDOWN))
 		ADD_TRAIT(owner, TRAIT_IGNOREDAMAGESLOWDOWN, SPECIES_TRAIT)
-	owner.additional_dexterity -= 2
-	owner.additional_mentality -= 1
+	owner.st_add_stat_mod(STAT_DEXTERITY, -2, "diablerie_high")
+	owner.st_add_stat_mod(STAT_TEMPORARY_WILLPOWER, -1, "diablerie_high")
 
 /datum/status_effect/diablerie_high/on_remove()
 	. = ..()
 	owner.remove_movespeed_modifier(/datum/movespeed_modifier/diablerie_high)
-	owner.additional_dexterity += 2
-	owner.additional_mentality += 1
+	owner.st_remove_stat_mod(STAT_DEXTERITY, "diablerie_high")
+	owner.st_remove_stat_mod(STAT_TEMPORARY_WILLPOWER, "diablerie_high")
 	if(HAS_TRAIT(owner, TRAIT_IGNOREDAMAGESLOWDOWN))
 		REMOVE_TRAIT(owner, TRAIT_IGNOREDAMAGESLOWDOWN, SPECIES_TRAIT)
 
@@ -1111,3 +1111,36 @@
 	source = null
 	return ..()
 
+/datum/status_effect/blood_debt
+	id = "blood_debt"
+	duration = 999 SCENES
+	alert_type = /atom/movable/screen/alert/status_effect/blood_debt
+	var/debt_amount = 0
+	var/initial_bloodpool = 0
+
+/datum/status_effect/blood_debt/on_creation(mob/living/owner, spent)
+	debt_amount = spent
+	initial_bloodpool = owner.bloodpool
+	return ..()
+
+/datum/status_effect/blood_debt/tick()
+	. = ..()
+	var/blood_gained = owner.bloodpool - initial_bloodpool
+
+	if(owner.bloodpool < initial_bloodpool)
+		initial_bloodpool = owner.bloodpool
+
+	if(blood_gained > 0)
+		var/payment = min(blood_gained, debt_amount)
+		owner.bloodpool -= payment
+		debt_amount -= payment
+		initial_bloodpool = owner.bloodpool
+
+		if(debt_amount <= 0)
+			qdel(src)
+
+/atom/movable/screen/alert/status_effect/blood_debt
+	name = "Blood Debt"
+	desc = "You cannot gain blood points until your debt is paid."
+	icon = 'icons/effects/effects.dmi'
+	icon_state = "bhole3"

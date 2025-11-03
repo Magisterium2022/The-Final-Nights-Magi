@@ -24,7 +24,7 @@
 
 /datum/discipline_power/animalism/summon_rat/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -59,7 +59,7 @@
 
 /datum/discipline_power/animalism/summon_cat/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -105,7 +105,7 @@
 
 /datum/discipline_power/animalism/summon_wolf/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -139,7 +139,7 @@
 
 /datum/discipline_power/animalism/summon_bat/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -174,23 +174,27 @@
 	check_flags = DISC_CHECK_IMMOBILE | DISC_CHECK_CAPABLE | DISC_CHECK_LYING
 
 	violates_masquerade = TRUE
-
 	cooldown_length = 8 SECONDS
-	duration_length = 20 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/animalism/shapeshift
+
+/datum/discipline_power/animalism/rat_shapeshift/pre_activation_checks()
+	. = ..()
+	if(HAS_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING))
+		to_chat(owner, span_warning("YOU ALREADY ARE TRANSFORMING!"))
+		return FALSE
+	else
+		ADD_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+	to_chat(owner, span_warning("You begin transforming..."))
+	if (do_after(owner, 6 SECONDS, timed_action_flags = (IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM )))
+		REMOVE_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+		return TRUE
 
 /datum/discipline_power/animalism/rat_shapeshift/activate()
 	. = ..()
 	if(!shapeshift)
 		shapeshift = new(owner)
 	shapeshift.Shapeshift(owner)
-
-/datum/discipline_power/animalism/rat_shapeshift/deactivate()
-	. = ..()
-	if(owner.stat != DEAD)
-		shapeshift.Restore(shapeshift.myshape)
-		owner.Stun(1.5 SECONDS)
 
 //SONG IN THE DARK
 /datum/discipline_power/animalism/song_in_the_dark

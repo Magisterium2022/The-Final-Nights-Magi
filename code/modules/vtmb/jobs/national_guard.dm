@@ -23,8 +23,18 @@
 	H.set_species(/datum/species/human)
 	H.set_clan(null)
 	H.generation = 13
-	H.maxHealth = round((initial(H.maxHealth)-initial(H.maxHealth)/4)+(initial(H.maxHealth)/4)*(H.physique+13-H.generation))
-	H.health = round((initial(H.health)-initial(H.health)/4)+(initial(H.health)/4)*(H.physique+13-H.generation))
+	H.st_set_stat(5, STAT_STAMINA)
+	H.st_set_stat(5, STAT_STRENGTH)
+	H.st_set_stat(5, STAT_DEXTERITY)
+	H.st_set_stat(5, STAT_FIREARMS)
+	H.st_set_stat(5, STAT_COURAGE)
+	H.st_get_stat(5, STAT_WITS)
+	H.st_set_stat(8, STAT_PERMANENT_WILLPOWER)
+	H.st_set_stat(8, STAT_TEMPORARY_WILLPOWER)
+	H.st_set_stat(5, STAT_LARCENY)
+	H.st_set_stat(5, STAT_ATHLETICS)
+	H.recalculate_max_health(TRUE)
+
 	for(var/datum/action/A in H.actions)
 		if(A.vampiric)
 			A.Remove(H)
@@ -120,6 +130,7 @@
 	owner.current.fully_replace_character_name(null,"[selected_rank] [my_name] [my_surname]")
 
 /datum/antagonist/national_guard/proc/forge_objectives()
+	spawn(2 SECONDS)
 	if(national_guard_team)
 		objectives |= national_guard_team.objectives
 
