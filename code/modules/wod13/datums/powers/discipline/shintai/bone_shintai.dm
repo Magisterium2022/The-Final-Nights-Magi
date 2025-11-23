@@ -93,7 +93,7 @@
 	. = ..()
 	if(owner.Yin_Chi == 0)
 		owner.visible_message(span_danger("You don't have sufficient Yin Chi to use this effect!")))
-		return TRUE
+		return
 	var/list/bones = list("Bone Claws", "Armour", "Skeleton Key")
 	var/chosen = tgui_input_list(user, "What shall we produce?", "Bone selection", changes)
 	switch(chosen)
@@ -106,6 +106,7 @@
 	if("Armour")
 		if(owner.Yin_Chi >= 2)
 			owner.visible_message(span_danger("You don't have sufficient Yin Chi to use this effect!")))
+			return
 		selected_item = "Armour"
 		owner.Yin_Chi -= 2
 		owner.physiology.armor.melee += 60
@@ -121,16 +122,14 @@
 	. = ..()
 	switch(selected_item)
 	if("Bone Claws")
-		selected_item = null
 		for(var/obj/item/melee/vampirearms/knife/gangrel/G in owner.contents)
 			qdel(G)
 	if("Armour")
-		selected_item = null
 		owner.physiology.armor.melee -= 60
 		owner.physiology.armor.bullet -= 60
 	if("Skeleton Key")
-		selected_item = null
 		owner.lockpicking -= 3
+	selected_item = null
 
 //FIVE POISON CLOUD
 /datum/discipline_power/bone_shintai/five_poison_cloud
