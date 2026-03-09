@@ -16,8 +16,8 @@
 	whitelisted = TRUE
 	clan_keys = /obj/item/vamp/keys/baali
 	default_accessory = "none"
-	accessories = list("baali_full", "baali_left", "baali_right", "baali_broken", "baali_round", "baali_devil", "baali_oni", "none")
-	accessories_layers = list("baali_full" = UNICORN_LAYER, "baali_left" = UNICORN_LAYER, "baali_right" = UNICORN_LAYER, "baali_broken" = UNICORN_LAYER, "baali_round" = UNICORN_LAYER, "baali_devil" = UNICORN_LAYER, "baali_oni" = UNICORN_LAYER, "none" = UNICORN_LAYER)
+	accessories = list("baali_full", "baali_left", "baali_right", "baali_broken", "baali_round", "baali_devil", "baali_oni", "baali_legs_and_tail", "baali_claws", "none")
+	accessories_layers = list("baali_full" = UNICORN_LAYER, "baali_left" = UNICORN_LAYER, "baali_right" = UNICORN_LAYER, "baali_broken" = UNICORN_LAYER, "baali_round" = UNICORN_LAYER, "baali_devil" = UNICORN_LAYER, "baali_oni" = UNICORN_LAYER, "baali_legs_and_tail" = UNICORN_LAYER, "baali_claws" = UNICORN_LAYER "none" = UNICORN_LAYER)
 
 /datum/vampire_clan/baali/on_gain(mob/living/carbon/human/H)
 	..()
