@@ -3,7 +3,7 @@
 	.["user"] = list()
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
-		.["user"]["Pact Level"] = H.pact_rating
+		.["user"]["pact"] = H.pact_rating
 		.["user"]["name"] = "[H.name]"
 		.["user"]["job"] = "[H.mind?.assigned_role]"
 		.["user"]["has_daimonion"] = H.daimonion_knowledge
