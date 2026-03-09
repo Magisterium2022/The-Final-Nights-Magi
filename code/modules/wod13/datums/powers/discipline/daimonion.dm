@@ -23,7 +23,7 @@
 	button_icon_state = "resist"
 	check_flags = AB_CHECK_HANDS_BLOCKED|AB_CHECK_IMMOBILE|AB_CHECK_LYING|AB_CHECK_CONSCIOUS
 	vampiric = TRUE
-	var/datum/investiture/investiture
+	var/datum/investiture_menu/investiture_menu
 
 /datum/action/investiture/Trigger(trigger_flags)
 	. = ..()
@@ -33,7 +33,7 @@
 	var/name = "Demonic Pacts Menu"
 
 /datum/investiture_menu/ui_data(mob/user)
-. = list()
+	. = list()
 	.["user"] = list()
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
@@ -64,10 +64,10 @@
 	to_chat(usr, span_notice("The tome whispers that its pages remain empty, awaiting dark knowledge..."))
 	return TRUE
 
-/datum/module_picker/ui_interact(mob/user, datum/tgui/ui)
+/datum/investiture_menu/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, "MalfunctionModulePicker", name)
+		ui = new(user, src, "InvestitureInterface", name)
 		ui.open()
 
 //SENSE THE SIN
