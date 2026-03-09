@@ -2410,6 +2410,23 @@
 	center = TRUE
 	dimension_y = 32
 
+/datum/sprite_accessory/wings/fallen_angel
+	name = "Fallen Angel"
+	icon_state = "fallen_angel"
+	color_src = 0
+	dimension_x = 46
+	center = TRUE
+	dimension_y = 34
+	locked = TRUE
+
+/datum/sprite_accessory/wings_open/fallen_angel
+	name = "Fallen Angel"
+	icon_state = "fallen_angel"
+	color_src = 0
+	dimension_x = 46
+	center = TRUE
+	dimension_y = 34
+
 /datum/sprite_accessory/frills
 	icon = 'icons/mob/mutant_bodyparts.dmi'
 
