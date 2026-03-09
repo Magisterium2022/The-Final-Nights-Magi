@@ -33,7 +33,7 @@ export const InvestitureInterface = (props) => {
               {getGreeting()}
               <br />
               You have a Pact Rating of <b style={{ 'color': '#9966cc' }}>
-                {data.user.pact_rating}
+                {data.user.pact}
               </b> in total.
             </Box>
           )}
@@ -49,7 +49,7 @@ export const InvestitureInterface = (props) => {
         >
           <Table style={{ 'background-color': '#000000' }}>
             {inventory.map((product) => {
-              const canAfford = data.user && product.price <= data.user.pact_rating;
+              const canAfford = data.user && product.price <= data.user.pact;
 
               return (
                 <Table.Row
