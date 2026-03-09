@@ -12,6 +12,64 @@
 	activate_sound = 'code/modules/wod13/sounds/protean_activate.ogg'
 	deactivate_sound = 'code/modules/wod13/sounds/protean_deactivate.ogg'
 
+/datum/discipline_power/daimonion/post_gain()
+	. = ..()
+	var/datum/action/investiture/investiture_open = new()
+	investiture_open.Grant(owner)
+
+/datum/action/investiture
+	name = "Infernal Pacts"
+	desc = "Power from sacrifice..."
+	button_icon_state = "resist"
+	check_flags = AB_CHECK_HANDS_BLOCKED|AB_CHECK_IMMOBILE|AB_CHECK_LYING|AB_CHECK_CONSCIOUS
+	vampiric = TRUE
+	var/datum/investiture/investiture
+
+/datum/action/investiture/Trigger(trigger_flags)
+	. = ..()
+	investiture_menu.ui_interact(owner)
+
+/datum/investiture_menu
+	var/name = "Demonic Pacts Menu"
+
+/datum/investiture_menu/ui_data(mob/user)
+. = list()
+	.["user"] = list()
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		.["user"]["pact"] = H.pact_rating
+		.["user"]["name"] = "[H.name]"
+		.["user"]["job"] = "[H.mind?.assigned_role]"
+		.["user"]["has_daimonion"] = H.daimonion_knowledge
+	else if(isliving(user))
+		var/mob/living/L = user
+		.["user"]["Pact Level"] = L.pact_rating
+		.["user"]["name"] = "[L.name]"
+		.["user"]["job"] = "Unknown"
+		.["user"]["has_daimonion"] = FALSE
+	else
+		.["user"]["Pact Level"] = 0
+		.["user"]["name"] = "Unknown"
+		.["user"]["job"] = "Unknown"
+		.["user"]["has_daimonion"] = FALSE
+
+/datum/investiture_menu/ui_act(action, params)
+	if(action != "purchase")
+		return ..()
+
+	if(!isliving(usr))
+		return ..()
+
+	// for now, there are no items in the prize list, but this is ready for future implementation
+	to_chat(usr, span_notice("The tome whispers that its pages remain empty, awaiting dark knowledge..."))
+	return TRUE
+
+/datum/module_picker/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "MalfunctionModulePicker", name)
+		ui.open()
+
 //SENSE THE SIN
 /datum/discipline_power/daimonion/sense_the_sin
 	name = "Sense the Sin"
