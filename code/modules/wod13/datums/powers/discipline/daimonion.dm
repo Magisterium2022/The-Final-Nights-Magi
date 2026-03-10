@@ -16,44 +16,55 @@
 	. = ..()
 	var/datum/action/investiture/investiture_open = new()
 	investiture_open.Grant(owner)
-
 /datum/action/investiture
 	name = "Infernal Pacts"
 	desc = "Power from sacrifice..."
 	button_icon_state = "resist"
 	check_flags = AB_CHECK_HANDS_BLOCKED|AB_CHECK_IMMOBILE|AB_CHECK_LYING|AB_CHECK_CONSCIOUS
 	vampiric = TRUE
-	var/datum/investiture_menu/investiture_menu
 
 /datum/action/investiture/Trigger(trigger_flags)
 	. = ..()
-	investiture_menu.ui_interact(owner)
+	var/mob/living/carbon/human/H = owner
+	H.investiture_menu()
+
+
+/mob/living/carbon/human/verb/investiture_menu()
+	set category = "IC"
+	set name = "See Demonic Pacts"
+	set desc = "See your demonic Pacts"
+
+	if(!investiture_menu)
+		investiture_menu = new(src)
+
+	investiture_menu.ui_interact(src)
 
 /datum/investiture_menu
 	var/name = "Demonic Pacts Menu"
+	var/mob/living/carbon/human/owner
 
-/datum/investiture_menu/ui_data(mob/user)
+/datum/investiture_menu/ui_host(mob/user)
+	return owner
+
+/datum/investiture_menu/ui_state(mob/user)
+	return GLOB.always_state
+
+/datum/investiture_menu/New(datum/mind/new_owner)
+	. = ..()
+	owner = new_owner
+
+/datum/investiture_menu/ui_data(owner)
 	. = list()
 	.["user"] = list()
-	if(ishuman(user))
-		var/mob/living/carbon/human/H = user
-		.["user"]["pact"] = H.pact_rating
-		.["user"]["name"] = "[H.name]"
-		.["user"]["job"] = "[H.mind?.assigned_role]"
-		.["user"]["has_daimonion"] = H.daimonion_knowledge
-	else if(isliving(user))
-		var/mob/living/L = user
-		.["user"]["Pact Level"] = L.pact_rating
-		.["user"]["name"] = "[L.name]"
-		.["user"]["job"] = "Unknown"
-		.["user"]["has_daimonion"] = FALSE
-	else
-		.["user"]["Pact Level"] = 0
-		.["user"]["name"] = "Unknown"
-		.["user"]["job"] = "Unknown"
-		.["user"]["has_daimonion"] = FALSE
+	var/mob/living/carbon/human/H = owner
+	.["user"]["pact"] = H.pact_rating
+	.["user"]["name"] = "[H.name]"
+	.["user"]["job"] = "[H.mind?.assigned_role]"
+	.["user"]["has_daimonion"] = H.daimonion_knowledge
+
 
 /datum/investiture_menu/ui_act(action, params)
+	. = ..()
 	if(action != "purchase")
 		return ..()
 
@@ -66,8 +77,8 @@
 
 /datum/investiture_menu/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "InvestitureInterface", name)
+	if(!ui)		
+		ui = new(user, src, "InvestitureInterface")
 		ui.open()
 
 //SENSE THE SIN
