@@ -93,6 +93,7 @@
 	//Shitty VtM vars I'm moving here so they're not strewn around the codebase
 	var/datum/vampire_clan/clan
 	var/datum/morality/morality_path
+	var/datum/investiture_menu/investiture_menu
 
 	var/last_repainted_mark
 
