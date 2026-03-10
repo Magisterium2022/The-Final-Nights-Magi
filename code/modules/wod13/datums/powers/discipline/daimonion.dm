@@ -16,6 +16,8 @@
 	. = ..()
 	var/datum/action/investiture/investiture_open = new()
 	investiture_open.Grant(owner)
+	owner.daimonion_knowledge = TRUE
+
 /datum/action/investiture
 	name = "Infernal Pacts"
 	desc = "Power from sacrifice..."
@@ -33,7 +35,11 @@
 	set category = "IC"
 	set name = "See Demonic Pacts"
 	set desc = "See your demonic Pacts"
+	var/mob/living/carbon/human/H = usr
 
+	if(!H.daimonion_knowledge == TRUE)
+		to_chat(usr, span_notice("You would never deal with Demons!"))
+		return
 	if(!investiture_menu)
 		investiture_menu = new(src)
 
