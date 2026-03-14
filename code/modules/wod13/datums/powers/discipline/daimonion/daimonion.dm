@@ -553,3 +553,9 @@
 /datum/discipline_power/daimonion/diabolic_lure/post_gain()
 	. = ..()
 	owner.physiology.burn_mod = 0 //Ignore the searing flame 6th dot trait.
+
+
+/obj/effect/fire/balefire
+	name = "balefire"
+	icon = 'modular_tfn/modules/paths/icons/paths.dmi'
+	icon_state = "balefire-on"
