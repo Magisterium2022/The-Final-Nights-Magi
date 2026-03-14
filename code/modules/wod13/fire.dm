@@ -39,11 +39,6 @@ SUBSYSTEM_DEF(die_in_a_fire)
 	plane = ABOVE_LIGHTING_PLANE
 	layer = ABOVE_LIGHTING_LAYER
 
-/obj/effect/fire/balefire
-	name = "balefire"
-	icon = 'modular_tfn/modules/paths/icons/paths.dmi'
-	icon_state = "balefire-on"
-
 /obj/structure
 	var/pepeled = FALSE
 
