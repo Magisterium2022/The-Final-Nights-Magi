@@ -1,0 +1,133 @@
+/datum/discipline/infernalist/lightning_reflexes
+	name = "Lightning Reflexes"
+	desc = "Boosts your speed. Violates Masquerade."
+	icon_state = "celerity"
+	power_type = /datum/discipline_power/infernalist/lightning_reflexes
+
+/datum/discipline_power/infernalist/lightning_reflexes
+	name = "Celerity power name"
+	desc = "Celerity power description"
+
+	activate_sound = 'code/modules/wod13/sounds/celerity_activate.ogg'
+	deactivate_sound = 'code/modules/wod13/sounds/celerity_deactivate.ogg'
+
+/datum/discipline/infernalist/lightning_reflexes/post_gain()
+	. = ..()
+	owner.st_add_stat_mod(STAT_DEXTERITY, level, "lightning_reflexes")
+
+/datum/discipline_power/infernalist/lightning_reflexes/proc/lightning_reflexes_visual(datum/discipline_power/infernalist/lightning_reflexes/source, atom/newloc, dir)
+	spawn()
+		var/obj/effect/lightning_reflexes/L = new(owner.loc)
+		L.name = owner.name
+		L.appearance = owner.appearance
+		L.dir = owner.dir
+		animate(L, pixel_x = rand(-16, 16), pixel_y = rand(-16, 16), alpha = 0, time = 0.5 SECONDS)
+		SEND_SIGNAL(owner, COMSIG_MASQUERADE_VIOLATION)
+
+
+/obj/effect/lightning_reflexes
+	name = "Afterimage"
+	desc = "..."
+	anchored = TRUE
+
+/obj/effect/lightning_reflexes/Initialize()
+	. = ..()
+	spawn(0.5 SECONDS)
+		qdel(src)
+
+/datum/discipline_power/infernalist/lightning_reflexes/activate()
+	. = ..()
+	owner.celerity_visual = TRUE
+
+/datum/discipline_power/infernalist/lightning_reflexes/deactivate()
+	. = ..()
+	owner.celerity_visual = FALSE
+
+/datum/discipline_power/infernalist/lightning_reflexes/proc/on_projectile_hit(mob/living/A, obj/projectile/P, def_zone)
+  if((active) && prob(5 * level)
+    owner.lightning_reflexes_visual()
+    return BULLET_ACT_FORCE_PIERCE
+	return BULLET_ACT_HIT
+
+/datum/discipline_power/infernalist/lightning_reflexes/one
+	name = "Celerity 1"
+	desc = "Enhances your speed to make everything a little bit easier."
+
+	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
+
+	toggled = TRUE
+	duration_length = 2 TURNS
+
+	grouped_powers = list(
+		/datum/discipline_power/infernalist/lightning_reflexes/two,
+		/datum/discipline_power/infernalist/lightning_reflexes/three,
+		/datum/discipline_power/infernalist/lightning_reflexes/four,
+		/datum/discipline_power/infernalist/lightning_reflexes/five
+	)
+
+
+/datum/discipline_power/infernalist/lightning_reflexes/two
+	name = "Celerity 2"
+	desc = "Significantly improves your speed and reaction time."
+
+	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
+
+	toggled = TRUE
+	duration_length = 2 TURNS
+
+	grouped_powers = list(
+		/datum/discipline_power/infernalist/lightning_reflexes/one,
+		/datum/discipline_power/infernalist/lightning_reflexes/three,
+		/datum/discipline_power/infernalist/lightning_reflexes/four,
+		/datum/discipline_power/infernalist/lightning_reflexes/five
+	)
+
+/datum/discipline_power/infernalist/lightning_reflexes/three
+	name = "Celerity 3"
+	desc = "Move faster. React in less time. Your body is under perfect control."
+
+	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
+
+	toggled = TRUE
+	duration_length = 2 TURNS
+
+	grouped_powers = list(
+		/datum/discipline_power/infernalist/lightning_reflexes/one,
+		/datum/discipline_power/infernalist/lightning_reflexes/two,
+		/datum/discipline_power/infernalist/lightning_reflexes/four,
+		/datum/discipline_power/infernalist/lightning_reflexes/five
+	)
+
+
+/datum/discipline_power/infernalist/lightning_reflexes/four
+	name = "Celerity 4"
+	desc = "Breach the limits of what is humanly possible. Move like a lightning bolt."
+
+	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
+
+	toggled = TRUE
+	duration_length = 2 TURNS
+
+	grouped_powers = list(
+		/datum/discipline_power/infernalist/lightning_reflexes/one,
+		/datum/discipline_power/infernalist/lightning_reflexes/two,
+		/datum/discipline_power/infernalist/lightning_reflexes/three,
+		/datum/discipline_power/infernalist/lightning_reflexes/five
+	)
+
+
+/datum/discipline_power/infernalist/lightning_reflexes/five
+	name = "Celerity 5"
+	desc = "You are like light. Blaze your way through the world."
+
+	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
+
+	toggled = TRUE
+	duration_length = 2 TURNS
+
+	grouped_powers = list(
+		/datum/discipline_power/infernalist/lightning_reflexes/one,
+		/datum/discipline_power/infernalist/lightning_reflexes/two,
+		/datum/discipline_power/infernalist/lightning_reflexes/three,
+		/datum/discipline_power/infernalist/lightning_reflexes/four
+	)
