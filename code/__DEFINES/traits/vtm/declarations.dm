@@ -98,3 +98,5 @@
 #define TRAIT_DOUBLE_VITAE_COST "double_vitae"
 /// Shitty trait done to help with easier checks for transforming with vampire discs
 #define TRAIT_CURRENTLY_TRANSFORMING "currently_transforming"
+#define TRAIT_DEVIL_EYES_OPEN	"devil_eyes_open" //This is for Devil Eyes (Baali) Stuff in regards to oepning and closing it
+#define TRAIT_DEVIL_EYES		"devil_eyes" //This is for when you want to like actually know if you have the eye or not
