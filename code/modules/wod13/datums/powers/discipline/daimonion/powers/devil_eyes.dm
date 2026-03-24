@@ -29,8 +29,18 @@
 		owner.update_body()
 		owner.visible_message(span_danger("[owner]'s Third Eye sinks back into their head"), span_userdanger("You close your third eye!")) //Same text as Salubri.
 		REMOVE_TRAIT(owner, TRAIT_DEVIL_EYE_OPEN, DEVIL_EYE_TRAIT)
+		REMOVE_TRAIT(owner, TRAIT_THERMAL_VISION, DEVIL_EYE_TRAIT)
+		REMOVE_TRAIT(owner, TRAIT_NIGHT_VISION, DEVIL_EYE_TRAIT)
+		var/datum/atom_hud/abductor_hud = GLOB.huds[DATA_HUD_ABDUCTOR]
+		abductor_hud.remove_hud_from(owner)
+		owner.update_sight()
 	else
 		devil.eye_icon_state = "devil_eyes"
 		owner.update_body()
 		owner.visible_message(span_danger("[owner] sprouts a Third Eye on their Forehead!"), span_userdanger("Your third eye forcibly awakens!"))
 		ADD_TRAIT(owner, TRAIT_DEVIL_EYE_OPEN, DEVIL_EYE_TRAIT)
+		ADD_TRAIT(owner, TRAIT_THERMAL_VISION, DEVIL_EYE_TRAIT)
+		ADD_TRAIT(owner, TRAIT_NIGHT_VISION, DEVIL_EYE_TRAIT)
+		var/datum/atom_hud/abductor_hud = GLOB.huds[DATA_HUD_ABDUCTOR] //Auspex code.
+		abductor_hud.add_hud_to(owner)
+		owner.update_sight()
