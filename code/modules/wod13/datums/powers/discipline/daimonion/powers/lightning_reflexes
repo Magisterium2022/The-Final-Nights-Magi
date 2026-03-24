@@ -5,8 +5,8 @@
 	power_type = /datum/discipline_power/infernalist/lightning_reflexes
 
 /datum/discipline_power/infernalist/lightning_reflexes
-	name = "Celerity power name"
-	desc = "Celerity power description"
+	name = "Lightning Reflexes power name"
+	desc = "Lightning Reflexes power description"
 
 	activate_sound = 'code/modules/wod13/sounds/celerity_activate.ogg'
 	deactivate_sound = 'code/modules/wod13/sounds/celerity_deactivate.ogg'
@@ -50,7 +50,7 @@
 	return BULLET_ACT_HIT
 
 /datum/discipline_power/infernalist/lightning_reflexes/one
-	name = "Celerity 1"
+	name = "Lightning Reflexes 1"
 	desc = "Enhances your speed to make everything a little bit easier."
 
 	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
@@ -67,7 +67,7 @@
 
 
 /datum/discipline_power/infernalist/lightning_reflexes/two
-	name = "Celerity 2"
+	name = "Lightning Reflexes 2"
 	desc = "Significantly improves your speed and reaction time."
 
 	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
@@ -83,7 +83,7 @@
 	)
 
 /datum/discipline_power/infernalist/lightning_reflexes/three
-	name = "Celerity 3"
+	name = "Lightning Reflexes 3"
 	desc = "Move faster. React in less time. Your body is under perfect control."
 
 	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
@@ -100,7 +100,7 @@
 
 
 /datum/discipline_power/infernalist/lightning_reflexes/four
-	name = "Celerity 4"
+	name = "Lightning Reflexes4"
 	desc = "Breach the limits of what is humanly possible. Move like a lightning bolt."
 
 	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
@@ -117,7 +117,7 @@
 
 
 /datum/discipline_power/infernalist/lightning_reflexes/five
-	name = "Celerity 5"
+	name = "Lightning Reflexes 5"
 	desc = "You are like light. Blaze your way through the world."
 
 	check_flags = DISC_CHECK_LYING | DISC_CHECK_IMMOBILE
