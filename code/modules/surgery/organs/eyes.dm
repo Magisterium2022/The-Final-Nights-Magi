@@ -120,6 +120,24 @@
 		salubri_opener.Remove(M)
 	if(HAS_TRAIT(M, TRAIT_SALUBRI_EYE_OPEN))
 		REMOVE_TRAIT(M, TRAIT_SALUBRI_EYE_OPEN, SALUBRI_EYE_TRAIT)
+
+/obj/item/organ/eyes/night_vision/kiasyd
+	eye_icon_state = "kiasyd"
+
+/obj/item/organ/eyes/devil_eyes
+	eye_icon_state = "devil_eyes"
+	var/datum/action/devil_eyes/devil_open
+
+/obj/item/organ/eyes/devil_eyes/Insert(mob/living/carbon/M, special = FALSE, drop_if_replaced = FALSE, initialising)
+	. = ..()
+	devil_open = new()
+	devil_open.Grant(M)
+
+/obj/item/organ/eyes/devil_eyes/Remove(mob/living/carbon/M, special = 0)
+	. = ..()
+	if(devil_open)
+		devil_open.Remove(M)
+
 /obj/item/organ/eyes/night_vision/kiasyd
 	eye_icon_state = "kiasyd"
 
