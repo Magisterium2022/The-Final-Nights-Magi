@@ -30,6 +30,7 @@
 	multi_activate = TRUE
 	cooldown_length = 10 SECONDS
 	duration_length = 3 SECONDS
+	vitae_cost = 0
 
 /datum/discipline_power/dementation/passion/pre_activation_checks(mob/living/target)
 
@@ -125,6 +126,7 @@
 	multi_activate = TRUE
 	cooldown_length = 10 SECONDS
 	duration_length = 3 SECONDS
+	vitae_cost = 0
 
 /datum/discipline_power/dementation/eyes_of_chaos/pre_activation_checks(mob/living/target)
 
