@@ -51,6 +51,7 @@
 /datum/discipline_power/dominate
 	name = "Dominate power name"
 	desc = "Dominate power description"
+	vitae_cost = 0 //All Dominate 1-5 powers have no listed blood cost.
 
 	activate_sound = 'code/modules/wod13/sounds/dominate.ogg'
 	var/domination_succeeded = FALSE
