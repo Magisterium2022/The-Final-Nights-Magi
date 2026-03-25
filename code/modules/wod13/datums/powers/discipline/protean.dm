@@ -276,7 +276,7 @@
 	vitae_cost = 1
 	violates_masquerade = TRUE
 
-	vitae_cost = 2
+	vitae_cost = 1
 
 	cooldown_length = 20 SECONDS
 
@@ -326,7 +326,7 @@
 
 	check_flags = DISC_CHECK_IMMOBILE | DISC_CHECK_CAPABLE
 
-	vitae_cost = 2
+	vitae_cost = 1
 	violates_masquerade = TRUE
 	cooldown_length = 20 SECONDS
 
