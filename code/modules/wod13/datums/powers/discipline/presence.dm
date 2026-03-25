@@ -200,7 +200,7 @@
 	multi_activate = TRUE
 	cooldown_length = 15 SECONDS
 	duration_length = 10 SECONDS
-	vitae_cost = 1 //no mention of literally any cost for using this in v20
+	vitae_cost = 0 //no mention of literally any cost for using this in v20 //No listed cost defaults to 0 cost.
 	var/successes = 0
 
 
@@ -362,6 +362,7 @@
 	cooldown_length = 12 MINUTES
 	duration_length = 3 MINUTES
 	willpower_cost = 1
+	vitae_cost = 0 //No BP cost for this, just willpower.
 	var/list/affected_targets = list()
 
 /datum/discipline_power/presence/majesty/pre_activation_checks(mob/living/target)
