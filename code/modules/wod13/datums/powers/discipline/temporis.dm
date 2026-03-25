@@ -72,6 +72,7 @@
 	hostile = TRUE
 
 	cooldown_length = 1 TURNS
+	vitae_cost = 0 //You can spend BP to make this last longer in TT, but it lasts hours and that wouldn't be fun.
 
 /datum/discipline_power/temporis/recurring_contemplation/activate(mob/living/target)
 	. = ..()
