@@ -33,6 +33,7 @@
 	multi_activate = TRUE
 	duration_length = 0.5 SECONDS
 	cooldown_length = 5 SECONDS
+	vitae_cost = 0
 
 /datum/discipline_power/serpentis/the_eyes_of_the_serpent/pre_activation_checks(mob/living/target)
 	if(issupernatural(target))
@@ -92,6 +93,7 @@
 	violates_masquerade = TRUE
 
 	cooldown_length = 5 SECONDS
+	vitae_cost = 0
 
 /datum/discipline_power/serpentis/the_tongue_of_the_asp/can_activate_untargeted(alert)
 	. = ..()
@@ -207,6 +209,7 @@
 	violates_masquerade = TRUE
 
 	cooldown_length = 20 SECONDS
+	vitae_cost = 0
 
 	var/obj/item/urn/urn
 
