@@ -283,7 +283,9 @@
 		if(HAS_TRAIT(user, TRAIT_PACIFISM)) // If the user has the pacifist trait, then they won't be able to fire [src] if the round chambered inside of [src] is lethal.
 			if(chambered.harmful) // Is the bullet chambered harmful?
 				to_chat(user, "<span class='warning'>[src] is lethally chambered! You don't want to risk harming anyone...</span>")
-				return
+				firing_burst = FALSE
+				semicd = FALSE
+				return FALSE
 		if(randomspread)
 			sprd = round((rand() - 0.5) * DUALWIELD_PENALTY_EXTRA_MULTIPLIER * (randomized_gun_spread + randomized_bonus_spread))
 		else //Smart spread
@@ -329,20 +331,18 @@
 		bonus_spread += 25
 	var/randomized_bonus_spread = rand(0, bonus_spread)
 
-	var/real_fire_delay = fire_delay
-	if(HAS_TRAIT(user, TRAIT_GUNFIGHTER))
-		real_fire_delay /= 2
-
 	if(burst_size > 1)
 		firing_burst = TRUE
 		for(var/i = 1 to burst_size)
-			addtimer(CALLBACK(src, PROC_REF(process_burst), user, target, message, params, zone_override, sprd, randomized_gun_spread, randomized_bonus_spread, rand_spr, i), max(1, real_fire_delay * (i - 1)))
+			addtimer(CALLBACK(src, PROC_REF(process_burst), user, target, message, params, zone_override, sprd, randomized_gun_spread, randomized_bonus_spread, rand_spr, i), max(1, fire_delay * (i - 1)))
 	else
 		if(chambered || HAS_TRAIT(user, TRAIT_THUNDERSHOT))
 			if(HAS_TRAIT(user, TRAIT_PACIFISM)) // If the user has the pacifist trait, then they won't be able to fire [src] if the round chambered inside of [src] is lethal.
 				if(chambered.harmful) // Is the bullet chambered harmful?
 					to_chat(user, "<span class='warning'>[src] is lethally chambered! You don't want to risk harming anyone...</span>")
-					return
+					firing_burst = FALSE
+					semicd = FALSE
+					return FALSE
 			sprd = round((rand() - 0.5) * DUALWIELD_PENALTY_EXTRA_MULTIPLIER * (randomized_gun_spread + randomized_bonus_spread))
 			before_firing(target,user)
 			if(!chambered.fire_casing(target, user, params, , suppressed, zone_override, sprd, src) && !HAS_TRAIT(user, TRAIT_THUNDERSHOT))
@@ -360,7 +360,7 @@
 			process_chamber()
 		update_icon()
 		semicd = TRUE
-		addtimer(CALLBACK(src, PROC_REF(reset_semicd)), real_fire_delay)
+		addtimer(CALLBACK(src, PROC_REF(reset_semicd)), fire_delay)
 
 	if(user)
 		user.update_inv_hands()

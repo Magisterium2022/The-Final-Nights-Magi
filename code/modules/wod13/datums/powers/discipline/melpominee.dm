@@ -11,6 +11,8 @@
 
 	activate_sound = 'code/modules/wod13/sounds/melpominee.ogg'
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //THE MISSING VOICE
 /datum/discipline_power/melpominee/the_missing_voice
 	name = "The Missing Voice"
@@ -18,22 +20,23 @@
 
 	level = 1
 	vitae_cost = 0
-	check_flags = DISC_CHECK_CONSCIOUS | DISC_CHECK_CAPABLE | DISC_CHECK_SPEAK
+	check_flags = DISC_CHECK_CONSCIOUS | DISC_CHECK_CAPABLE | DISC_CHECK_SPEAK | DISC_CHECK_DIRECT_SEE
 	target_type = TARGET_OBJ | TARGET_LIVING
 	range = 7
+	custom_logging = TRUE
 
 	cooldown_length = 5 SECONDS
 
 /datum/discipline_power/melpominee/the_missing_voice/activate(atom/movable/target)
 	. = ..()
-	var/new_say = input(owner, "What will [target] say?") as null|text
+	var/new_say = tgui_input_text(owner, "What will [target] say?")
 	if(!new_say)
 		return
 
 	//prevent forceful emoting and whatnot
 	new_say = trim(copytext_char(sanitize(new_say), 1, MAX_MESSAGE_LEN))
 	if (findtext(new_say, "*"))
-		to_chat(owner, span_danger("You can't force others to perform emotes!"))
+		to_chat(owner, span_danger("You can't perform emotes remotely!"))
 		return
 
 	if (CHAT_FILTER_CHECK(new_say))
@@ -41,11 +44,36 @@
 		SSblackbox.record_feedback("tally", "ic_blocked_words", 1, lowertext(config.ic_filter_regex.match))
 		return
 
-	target.say(message = new_say, forced = "melpominee 1")
+	target.melpominee_say(owner, message = new_say)
+	do_logging(target, new_say)
 
 	if (!isliving(target))
 		return
 
+	speaker_mouth_check(target)
+
+/atom/movable/proc/melpominee_say(speaker, message, bubble_type, list/spans = list(), sanitize = TRUE, datum/language/language = null, ignore_spam = FALSE, forced = TRUE)
+	if(!can_speak())
+		return
+	if(message == "" || !message)
+		return
+	spans |= speech_span
+	if(!language)
+		language = get_selected_language()
+
+	var/range = 7
+	var/list/message_mods = list()
+	var/ending = copytext_char(message, -1)	//Better not to do like that..
+	var/rendered = compose_message(speaker, language, message, , spans, message_mods)
+	if(ending == "!")
+		range = 15
+	for(var/_AM in get_hearers_in_view(range, src))
+		var/atom/movable/AM = _AM
+		if(get_dist(AM, src) > 7)
+			rendered = "<span class='scream_away'>[rendered]</span>" //! Take an attention, this will NOT overlap client font-size, fix it if you can
+		AM.Hear(rendered, src, language, message, , spans, message_mods, TRUE)
+
+/datum/discipline_power/melpominee/proc/speaker_mouth_check(mob/living/target)
 	//viewers are able to detect if a person's words aren't their own
 	var/base_difficulty = 5
 	var/difficulty_malus = 0
@@ -64,11 +92,17 @@
 		difficulty_malus = 0
 		if (get_dist(hearer, target) > 3)
 			difficulty_malus += 1
-		if (SSroll.storyteller_roll(hearer.get_total_mentality(), base_difficulty + difficulty_malus, mobs_to_show_output = hearer) == ROLL_SUCCESS)
+		if (SSroll.storyteller_roll(hearer.st_get_stat(STAT_PERMANENT_WILLPOWER), base_difficulty + difficulty_malus, mobs_to_show_output = hearer) == ROLL_SUCCESS)
 			if (masked)
 				to_chat(hearer, span_warning("[target]'s jaw isn't moving to match [target.p_their()] words."))
 			else
 				to_chat(hearer, span_warning("[target]'s lips aren't moving to match [target.p_their()] words."))
+
+/datum/discipline_power/melpominee/the_missing_voice/do_logging(target, message)
+	. = ..()
+	log_combat(owner, target, "Forced [target] to say [message]")
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //PHANTOM SPEAKER
 /datum/discipline_power/melpominee/phantom_speaker
@@ -78,18 +112,27 @@
 	level = 2
 	vitae_cost = 0
 	check_flags = DISC_CHECK_CONSCIOUS | DISC_CHECK_SPEAK
-
+	custom_logging = TRUE
 	cooldown_length = 5 SECONDS
 
 /datum/discipline_power/melpominee/phantom_speaker/activate()
 	. = ..()
-	var/mob/living/target = input(owner, "Who will you project your voice to?") as null|mob in (GLOB.player_list - owner)
-	if(!target)
-		return
+	var/melpominee_target = tgui_input_text(owner, "Phantom Speaker Target:", "Phantom Speaker Target", null)
+	if(!melpominee_target)
+		return FALSE
+	melpominee_target = sanitize_name(melpominee_target)
+	var/mob/living/carbon/human/targeted_human
+	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(H.real_name == melpominee_target)
+			targeted_human = H
+			break
 
-	var/input_message = input(owner, "What message will you project to them?") as null|text
+	if(!targeted_human)
+		to_chat(owner, span_warning("You cannot sense anyone by that name."))
+		return FALSE
+	var/input_message = tgui_input_text(owner, "Message", "What message will you project to them?", null)
 	if (!input_message)
-		return
+		return FALSE
 
 	//sanitisation!
 	input_message = trim(copytext_char(sanitize(input_message), 1, MAX_MESSAGE_LEN))
@@ -97,12 +140,17 @@
 		to_chat(owner, span_warning("That message contained a word prohibited in IC chat! Consider reviewing the server rules.\n<span replaceRegex='show_filtered_ic_chat'>\"[input_message]\"</span>"))
 		SSblackbox.record_feedback("tally", "ic_blocked_words", 1, lowertext(config.ic_filter_regex.match))
 		return
-
+	do_logging(targeted_human, input_message)
 	var/language = owner.get_selected_language()
 	var/message = owner.compose_message(owner, language, input_message, , list())
-	to_chat(target, "<span class='purple'><i>You hear someone's voice in your head...</i></span>")
-	target.Hear(message, target, language, input_message, , , )
-	to_chat(owner, span_notice("You project your voice to [target]'s ears."))
+	to_chat(targeted_human, "<span class='purple'><i>You hear someone's voice in your head...</i></span>")
+	targeted_human.Hear(message, targeted_human, language, input_message, , , )
+	to_chat(owner, span_notice("You project your voice to [targeted_human]'s ears."))
+
+/datum/discipline_power/melpominee/phantom_speaker/do_logging(target, message)
+    . = ..()
+    log_combat(owner, target, "Told [target] the folllowing message: [message]")
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //MADRIGAL
 /datum/discipline_power/melpominee/madrigal
@@ -115,6 +163,11 @@
 	cooldown_length = 5 SECONDS
 	duration_length = 2 SECONDS
 	duration_override = TRUE
+
+/datum/discipline_power/melpominee/madrigal/pre_activation_checks(atom/target)
+	if(SSroll.storyteller_roll((owner.st_get_stat(STAT_CHARISMA) + owner.st_get_stat(STAT_PERFORMANCE)), 7, FALSE, owner))
+		return TRUE
+	return FALSE
 
 /datum/discipline_power/melpominee/madrigal/activate()
 	. = ..()
@@ -137,6 +190,9 @@
 	. = ..()
 	target.remove_overlay(MUTATIONS_LAYER)
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //SIREN'S BECKONING
 /datum/discipline_power/melpominee/sirens_beckoning
 	name = "Siren's Beckoning"
@@ -154,6 +210,8 @@
 /datum/discipline_power/melpominee/sirens_beckoning/activate()
 	. = ..()
 	for(var/mob/living/carbon/human/listener in oviewers(7, owner))
+		if(!SSroll.storyteller_roll((owner.st_get_stat(STAT_MANIPULATION) + owner.st_get_stat(STAT_PERFORMANCE)), listener.st_get_stat(STAT_TEMPORARY_WILLPOWER), FALSE, owner))
+			continue
 		listener.Stun(2 SECONDS)
 
 		listener.remove_overlay(MUTATIONS_LAYER)
@@ -166,6 +224,9 @@
 /datum/discipline_power/melpominee/sirens_beckoning/deactivate(mob/living/carbon/human/target)
 	. = ..()
 	target.remove_overlay(MUTATIONS_LAYER)
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //SHATTERING CRESCENDO
 /datum/discipline_power/melpominee/shattering_crescendo
@@ -197,3 +258,6 @@
 /datum/discipline_power/melpominee/shattering_crescendo/deactivate(mob/living/carbon/human/target)
 	. = ..()
 	target.remove_overlay(MUTATIONS_LAYER)
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+

@@ -109,6 +109,10 @@ GLOBAL_LIST_EMPTY(selectable_races)
 	var/punchdamagehigh = 10
 	///Base electrocution coefficient.  Basically a multiplier for damage from electrocutions.
 	var/meleemod = 1
+	// TFN EDIT START
+	///Base type of damage a mob does, this can range from sharp, pointy, to edged. (Claws? Edged. Spiked knuckles? Pointy. Etc.)
+	var/sharpness = SHARP_NONE
+	// TFN EDIT END
 	//For melee damage
 	var/siemens_coeff = 1
 	///What kind of damage overlays (if any) appear on our species when wounded? If this is "", does not add an overlay.
@@ -205,6 +209,9 @@ GLOBAL_LIST_EMPTY(selectable_races)
 	var/whitelisted = FALSE
 	///If this species can be selected for characters at all.
 	var/selectable = FALSE
+
+ 	//TFN EDIT: Does this species keep their languages when they transform, but not gain other languages as a result?
+	var/keeps_languages_on_transform = FALSE
 
 ///////////
 // PROCS //
@@ -399,6 +406,15 @@ GLOBAL_LIST_EMPTY(selectable_races)
 	C.mob_biotypes = inherent_biotypes
 
 	regenerate_organs(C,old_species)
+
+	if(ishuman(C))
+		var/mob/living/carbon/human/H = C
+		if(H.physiology)
+			H.physiology.brute_mod = brutemod
+			H.physiology.burn_mod = burnmod
+			H.physiology.cold_mod = coldmod
+			H.physiology.heat_mod = heatmod
+			H.physiology.stun_mod = stunmod
 
 	if(exotic_bloodtype && C.dna.blood_type != exotic_bloodtype)
 		C.dna.blood_type = exotic_bloodtype
@@ -1400,7 +1416,7 @@ GLOBAL_LIST_EMPTY(selectable_races)
 			else
 				user.do_attack_animation(target, ATTACK_EFFECT_PUNCH)
 
-		var/damage = (rand(user.dna.species.punchdamagelow, user.dna.species.punchdamagehigh)/3)*(user.get_total_physique())
+		var/damage = (rand(user.dna.species.punchdamagelow, user.dna.species.punchdamagehigh)/3)*(user.st_get_stat(STAT_BRAWL))
 
 		var/obj/item/bodypart/affecting = target.get_bodypart(ran_zone(user.zone_selected))
 
@@ -1427,10 +1443,6 @@ GLOBAL_LIST_EMPTY(selectable_races)
 						"<span class='userdanger'>You're [atk_verb]ed by [user]!</span>", "<span class='hear'>You hear a sickening sound of flesh hitting flesh!</span>", COMBAT_MESSAGE_RANGE, user)
 		to_chat(user, "<span class='danger'>You [atk_verb] [target]!</span>")
 
-		if(user.potential >= 5)
-			var/atom/throw_target = get_edge_target_turf(target, user.dir)
-			target.throw_at(throw_target, rand(5, 7), 4, user, gentle = TRUE) //No stun nor impact damage from throwing people around
-
 		target.lastattacker = user.real_name
 		target.lastattackerckey = user.ckey
 		user.lastattacked = target
@@ -1439,9 +1451,7 @@ GLOBAL_LIST_EMPTY(selectable_races)
 			target.dismembering_strike(user, affecting.body_zone)
 
 		var/meleemod = 1
-		meleemod = user.dna.species.meleemod
-		if(user.get_total_physique() > 4)
-			meleemod = (meleemod)+((user.get_total_physique() + 1)/5 - 1) //1.2x at Physique 5, increasing by 0.2x per point higher than that.
+		meleemod = (user.dna.species.meleemod)+((user.st_get_stat(STAT_STRENGTH) + 1)/5 - 1)
 
 		if(atk_verb == ATTACK_EFFECT_KICK)//kicks deal 1.1x raw damage
 			target.apply_damage(damage*1.1*meleemod, user.dna.species.attack_type, affecting, armor_block)
@@ -1458,9 +1468,9 @@ GLOBAL_LIST_EMPTY(selectable_races)
 		if((target.stat != DEAD) && (!target.IsKnockdown()))
 			//Compare puncher's physique to the greater between the target's physique (robust enough to tank it) or dexterity (rolls with the punches)
 			var/roll = SSroll.storyteller_roll(
-			dice = target.get_total_physique() + round(min(target.get_total_athletics(), target.get_total_dexterity()) / 2),
-			difficulty = clamp(user.get_total_physique(), 1, 4) + (HAS_TRAIT(user, TRAIT_WARRIOR) ? rand(1,4) : 0),
-			mobs_to_show_output = user)
+			dice = user.st_get_stat(STAT_STRENGTH) + user.st_get_stat(STAT_MELEE),
+			difficulty = target.st_get_stat(STAT_DEXTERITY),
+			mobs_to_show_output = list(target, user))
 
 			if(roll == ROLL_FAILURE)
 				target.visible_message("<span class='danger'>[user] knocks [target] down!</span>", "<span class='userdanger'>You're knocked down by [user]!</span>", "<span class='hear'>You hear aggressive shuffling followed by a loud thud!</span>", COMBAT_MESSAGE_RANGE, user)
@@ -1478,6 +1488,9 @@ GLOBAL_LIST_EMPTY(selectable_races)
 		return FALSE
 	if(user.loc == target.loc)
 		return FALSE
+	if(user.potential >= 5)
+		var/atom/throw_target = get_edge_target_turf(target, user.dir)
+		target.throw_at(throw_target, rand(5, 7), 4, user, gentle = TRUE) //No stun nor impact damage from throwing people around
 	user.disarm(target)
 
 

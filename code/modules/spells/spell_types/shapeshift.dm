@@ -1,3 +1,5 @@
+#define COMSIG_MOB_RETURNED_TO_FORM "mob_returned_to_form" // TFN EDIT ADDITION - Reworking protean
+
 /obj/effect/proc_holder/spell/targeted/shapeshift
 	name = "Shapechange"
 	desc = "Take on the shape of another for a time to use their natural abilities. Once you've made your choice it cannot be changed."
@@ -49,7 +51,6 @@
 			if(!shapeshift_type) //If you aren't gonna decide I am!
 				shapeshift_type = pick(animal_list)
 			shapeshift_type = animal_list[shapeshift_type]
-
 		var/obj/shapeshift_holder/S = locate() in M
 		if(S)
 			M = Restore(M)
@@ -81,8 +82,12 @@
 		var/mob/living/simple_animal/hostile/hostile = shape
 		hostile.my_creator = caster
 	H = new(shape,src,caster)
-	if(HAS_TRAIT(caster, TRAIT_WARRIOR) && !HAS_TRAIT(shape, TRAIT_WARRIOR))
-		ADD_TRAIT(shape, TRAIT_WARRIOR, ROUNDSTART_TRAIT)
+//TFN MODIFIED STUFF!!!! PR: Reworking Protean a b̶i̶t̶ lot as well as Transformations boogaloo 2.0
+	var/newgen = caster.generation
+	shape.generation = newgen
+	var/datum/action/transform_back/restore = new()
+	restore.Grant(shape)
+//END OF TFN MODIFIED STUFF!!!!
 
 	clothes_req = FALSE
 	human_req = FALSE
@@ -98,6 +103,33 @@
 
 	clothes_req = initial(clothes_req)
 	human_req = initial(human_req)
+
+///TFN MODIFIED STUFF!! Reworking Protean a b̶i̶t̶ lot as well as Transformations boogaloo 2.0
+
+//Abilities for Vampire related Shapeshifting
+
+
+/datum/action/transform_back
+	name = "Return to Form"
+	desc = "Transform back to your original form."
+	button_icon_state = "protean"
+	button_icon = 'code/modules/wod13/UI/actions.dmi'
+	background_icon_state = "gift"
+	icon_icon = 'code/modules/wod13/UI/actions.dmi'
+	check_flags = AB_CHECK_CONSCIOUS
+
+/datum/action/transform_back/Trigger(trigger_flags)
+	. = ..()
+	var/obj/shapeshift_holder/Shape = locate() in owner
+	if(Shape)
+		. =  Shape.stored
+		SEND_SIGNAL(Shape.stored, COMSIG_MOB_RETURNED_TO_FORM)
+		Shape.restore()
+	else
+		to_chat(owner, span_warning("You cannot transform back to your original form as you are already in your original form. Unless you believe it is not?"))
+
+///END OF TFN MODIFIED STUFF!!!
+
 
 /obj/effect/proc_holder/spell/targeted/shapeshift/dragon
 	name = "Dragon Form"
@@ -116,6 +148,10 @@
 	var/mob/living/shape
 	var/restoring = FALSE
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/source
+	// Store language data separately from the language holder to preserve across mind transfers
+	var/list/backup_understood_languages
+	var/list/backup_spoken_languages
+	var/backup_selected_language
 
 /obj/shapeshift_holder/Initialize(mapload,obj/effect/proc_holder/spell/targeted/shapeshift/_source, mob/living/caster)
 	. = ..()
@@ -124,8 +160,40 @@
 	if(!istype(shape))
 		CRASH("shapeshift holder created outside mob/living")
 	stored = caster
+
+	//TFN EDIT ADDITION START - Fixes Simplemob Transformations Losing Languages
+	// store language data
+	var/datum/language_holder/original_holder = stored.get_language_holder() //get_language_holder defaults to the mind language holder rather than the atom's
+	if(original_holder)
+		backup_understood_languages = list()
+		backup_spoken_languages = list()
+
+		for(var/language in original_holder.understood_languages)
+			backup_understood_languages += language
+
+		for(var/language in original_holder.spoken_languages)
+			backup_spoken_languages += language
+
+		backup_selected_language = original_holder.selected_language
+	//TFN EDIT ADDITION START - Fixes Simplemob Transformations Losing Languages
+
 	if(stored.mind)
 		stored.mind.transfer_to(shape)
+
+		//TFN EDIT ADDITION START - Fixes Simplemob Transformations Losing Languages
+		// Bring stored languages after transfer_to (transfer_to calls update_atom_languages() which will have cleared all languages from the mind since it draws from the atom's language holder)
+		var/datum/language_holder/mind_holder = shape.mind?.get_language_holder()
+		if(mind_holder && backup_understood_languages && backup_spoken_languages)
+			for(var/language in backup_understood_languages)
+				mind_holder.grant_language(language, TRUE, FALSE)
+
+			for(var/language in backup_spoken_languages)
+				mind_holder.grant_language(language, FALSE, TRUE)
+
+			if(backup_selected_language && mind_holder.can_speak_language(backup_selected_language))
+				mind_holder.selected_language = backup_selected_language
+		//TFN EDIT ADDITION START - Fixes Simplemob Transformations Losing Languages
+
 	stored.forceMove(src)
 	stored.notransform = TRUE
 	if(source.convert_damage)
@@ -134,8 +202,8 @@
 
 		shape.apply_damage(damapply, source.convert_damage_type, forced = TRUE, wound_bonus=CANT_WOUND);
 
-	RegisterSignals(shape, list(COMSIG_PARENT_QDELETING, COMSIG_LIVING_DEATH), PROC_REF(shape_death))
-	RegisterSignals(stored, list(COMSIG_PARENT_QDELETING, COMSIG_LIVING_DEATH), PROC_REF(caster_death))
+	RegisterSignals(shape, list(COMSIG_QDELETING, COMSIG_LIVING_DEATH), PROC_REF(shape_death))
+	RegisterSignals(stored, list(COMSIG_QDELETING, COMSIG_LIVING_DEATH), PROC_REF(caster_death))
 
 /obj/shapeshift_holder/Destroy()
 	// Restore manages signal unregistering. If restoring is TRUE, we've already unregistered the signals and we're here
@@ -179,13 +247,30 @@
 /obj/shapeshift_holder/proc/restore(death=FALSE)
 	// Destroy() calls this proc if it hasn't been called. Unregistering here prevents multiple qdel loops
 	// when caster and shape both die at the same time.
-	UnregisterSignal(shape, list(COMSIG_PARENT_QDELETING, COMSIG_LIVING_DEATH))
-	UnregisterSignal(stored, list(COMSIG_PARENT_QDELETING, COMSIG_LIVING_DEATH))
+	UnregisterSignal(shape, list(COMSIG_QDELETING, COMSIG_LIVING_DEATH))
+	UnregisterSignal(stored, list(COMSIG_QDELETING, COMSIG_LIVING_DEATH))
 	restoring = TRUE
 	stored.forceMove(shape.loc)
 	stored.notransform = FALSE
 	if(shape.mind)
 		shape.mind.transfer_to(stored)
+
+		//TFN EDIT ADDITION START - Fixes Simplemob Transformations Losing Languages
+		// transfer_to calls update_atom_languages(), and the atom language holder doesn't store our languages from quirks, so restore from backup list created in Initialize()
+		var/datum/language_holder/restored_holder = stored.get_language_holder() //defaults to the mind language holder, if it exists
+		if(restored_holder && backup_understood_languages && backup_spoken_languages)
+			restored_holder.remove_all_languages()
+
+			for(var/language_type in backup_understood_languages)
+				restored_holder.grant_language(language_type, TRUE, FALSE)
+
+			for(var/language_type in backup_spoken_languages)
+				restored_holder.grant_language(language_type, FALSE, TRUE)
+
+			if(backup_selected_language)
+				restored_holder.selected_language = backup_selected_language
+		//TFN EDIT ADDITION END - Fixes Simplemob Transformations Losing Languages
+
 	if(death)
 		stored.death()
 	else if(source.convert_damage)
@@ -208,7 +293,7 @@ Result: you take at least 90 damage when you trasnform back
 //	if(source.convert_damage)
 //		stored.blood_volume = shape.blood_volume;
 
-	// This guard is important because restore() can also be called on COMSIG_PARENT_QDELETING for shape, as well as on death.
+	// This guard is important because restore() can also be called on COMSIG_QDELETING for shape, as well as on death.
 	// This can happen in, for example, [/proc/wabbajack] where the mob hit is qdel'd.
 	if(!QDELETED(shape))
 		QDEL_NULL(shape)

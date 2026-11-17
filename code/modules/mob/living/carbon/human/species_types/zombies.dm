@@ -133,7 +133,7 @@
 				if(A.objectives)
 					dat += "[printobjectives(A.objectives)]<BR>"
 		var/masquerade_level = " have been a perfect tool for my Necromancer."
-		switch(host.masquerade)
+		switch(host.masquerade_score)
 			if(4)
 				masquerade_level = " have let my true nature slip once."
 			if(3)
@@ -145,13 +145,6 @@
 			if(0)
 				masquerade_level = " have become a danger to my Necromancer and their society."
 		dat += "In the world of the mundane, I[masquerade_level]<BR>"
-		dat += "<b>Physique</b>: [host.physique] + [host.additional_physique]<BR>"
-		dat += "<b>Dexterity</b>: [host.dexterity] + [host.additional_dexterity]<BR>"
-		dat += "<b>Social</b>: [host.social] + [host.additional_social]<BR>"
-		dat += "<b>Mentality</b>: [host.mentality] + [host.additional_mentality]<BR>"
-		dat += "<b>Cruelty</b>: [host.blood] + [host.additional_blood]<BR>"
-		dat += "<b>Lockpicking</b>: [host.lockpicking] + [host.additional_lockpicking]<BR>"
-		dat += "<b>Athletics</b>: [host.athletics] + [host.additional_athletics]<BR>"
 		if(host.Myself)
 			if(host.Myself.Friend)
 				if(host.Myself.Friend.owner)
@@ -205,6 +198,13 @@
 
 	//zombies resist vampire bites better than mortals
 	RegisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_zombie_bitten))
+	ADD_TRAIT(C, TRAIT_MASQUERADE_VIOLATING_FACE, "zombie")
+
+/datum/species/zombie/proc/on_zombie_bitten(datum/source, mob/living/carbon/being_bitten)
+	SIGNAL_HANDLER
+
+	if(iszombie(being_bitten))
+		return COMPONENT_RESIST_VAMPIRE_KISS
 
 /datum/species/ghoul/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
 	. = ..()
@@ -212,21 +212,5 @@
 	for(var/datum/action/zombieinfo/infor in C.actions)
 		if(infor)
 			infor.Remove(C)
-
-/datum/species/zombie/spec_life(mob/living/carbon/human/H)
-	. = ..()
-	if(HAS_TRAIT(H, TRAIT_UNMASQUERADE))
-		if(H.CheckEyewitness(H, H, 7, FALSE))
-			H.AdjustMasquerade(-1)
-
-	if(H.is_face_visible())
-		if (H.CheckEyewitness(H, H, 5, FALSE)) //it's san fran, there are crackheads everywhere
-			H.AdjustMasquerade(-1)
-
-/datum/species/zombie/proc/on_zombie_bitten(datum/source, mob/living/carbon/being_bitten)
-	SIGNAL_HANDLER
-
-	if(iszombie(being_bitten))
-		return COMPONENT_RESIST_VAMPIRE_KISS
 
 #undef REGENERATION_DELAY

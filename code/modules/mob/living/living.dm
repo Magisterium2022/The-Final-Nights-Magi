@@ -9,9 +9,42 @@
 		diag_hud.add_to_hud(src)
 	faction += "[REF(src)]"
 	GLOB.mob_living_list += src
+	src.calculate_max_bloodpool()
 
+//TFN EDIT
+/mob/living/proc/calculate_max_bloodpool()
 	//recalculates maxbloodpool
-	maxbloodpool = 10 + ((13 - generation) * 3)
+	var/generation_blood_bonus
+	switch(generation)
+		if(13 to HIGHEST_GENERATION_LIMIT)	//Gen 13-16 get BP of only 10.
+			generation_blood_bonus = 0
+		if(12)
+			generation_blood_bonus = 1
+		if(11)
+			generation_blood_bonus = 2
+		if(10)
+			generation_blood_bonus = 3
+		if(9)
+			generation_blood_bonus = 4
+		if(8)
+			generation_blood_bonus = 5
+		if(7)
+			generation_blood_bonus = 10
+			bloodquality += 1
+		if(6)
+			generation_blood_bonus = 20
+			bloodquality += 2
+		if(5)
+			generation_blood_bonus = 40
+			bloodquality += 3
+		if(4)
+			generation_blood_bonus = 50
+			bloodquality += 4
+		if(1 to 3)
+			generation_blood_bonus = INFINITY	//Should be 100 but fuck it, includes gen 1 and 2.
+			bloodquality += 100
+	maxbloodpool = max(10 + generation_blood_bonus, 10)
+//TFN EDIT END
 
 /mob/living/ComponentInitialize()
 	. = ..()
@@ -85,7 +118,7 @@
 	if(now_pushing)
 		return TRUE
 
-	var/they_can_move = TRUE
+	they_can_move = TRUE
 	if(isliving(M))
 		var/mob/living/L = M
 		they_can_move = L.mobility_flags & MOBILITY_MOVE
@@ -118,22 +151,7 @@
 		return TRUE
 
 	if(!M.buckled && !M.has_buckled_mobs())
-		var/mob_swap = FALSE
-		var/too_strong = (M.move_resist > move_force) //can't swap with immovable objects unless they help us
-		if(!they_can_move) //we have to physically move them
-			if(!too_strong)
-				mob_swap = TRUE
-		else
-			//You can swap with the person you are dragging on grab intent, and restrained people in most cases
-			if(M.pulledby == src && !too_strong)
-				mob_swap = TRUE
-			else if(
-				!(HAS_TRAIT(M, TRAIT_NOMOBSWAP) || HAS_TRAIT(src, TRAIT_NOMOBSWAP))&&\
-				((HAS_TRAIT(M, TRAIT_RESTRAINED) && !too_strong) || !combat_mode) &&\
-				(HAS_TRAIT(src, TRAIT_RESTRAINED) || !combat_mode)
-			)
-				mob_swap = TRUE
-		if(mob_swap)
+		if(can_mobswap_with(M))
 			//switch our position with M
 			if(loc && !loc.Adjacent(M.loc))
 				return TRUE
@@ -180,6 +198,43 @@
 		if(!istype(M, /obj/item/clothing))
 			if(prob(I.block_chance*2))
 				return
+
+/mob/living/proc/can_mobswap_with(mob/other)
+	if (HAS_TRAIT(other, TRAIT_NOMOBSWAP) || HAS_TRAIT(src, TRAIT_NOMOBSWAP))
+		return FALSE
+
+	they_can_move = TRUE
+	var/their_combat_mode = FALSE
+
+	if(isliving(other))
+		var/mob/living/other_living = other
+		their_combat_mode = other_living.combat_mode
+		they_can_move = other_living.mobility_flags & MOBILITY_MOVE
+
+	var/too_strong = other.move_resist > move_force
+
+	// They cannot move, see if we can push through them
+	if(!they_can_move)
+		return !too_strong
+
+	// We are pulling them and can move through
+	if(other.pulledby == src && !too_strong)
+		return TRUE
+
+	// If we're in combat mode and not restrained we don't try to pass through people
+	if(combat_mode && !HAS_TRAIT(src, TRAIT_RESTRAINED))
+		return FALSE
+
+	// Nor can we pass through non-restrained people in combat mode (or if they're restrained but still too strong for us)
+	if(their_combat_mode && (!HAS_TRAIT(other, TRAIT_RESTRAINED) || too_strong))
+		return FALSE
+
+	// If there is no ckey on the mob, and you did not return false from prior checks, you can move through
+	if(isnull(other.client) || isnull(client))
+		return TRUE
+
+	// Else, sure, let us pass
+	return TRUE
 
 /mob/living/get_photo_description(obj/item/camera/camera)
 	var/list/mob_details = list()
@@ -413,8 +468,7 @@
 	if(!whispered)
 		to_chat(src, "<span class='notice'>You have given up life and succumbed to death.</span>")
 
-/mob/living/verb/untorpor()
-	set hidden = TRUE
+/mob/living/proc/untorpor()
 	if(HAS_TRAIT(src, TRAIT_TORPOR))
 		if(iskindred(src))
 			if (bloodpool > 0)
@@ -969,8 +1023,8 @@
 			altered_grab_state++
 		var/resist_chance = BASE_GRAB_RESIST_CHANCE /// see defines/combat.dm, this should be baseline 60%
 		var/mob/living/G = pulledby
-		var/grabber_physique = (G.get_total_physique()) * 10 // The one who is grabbing physique
-		var/resist_physique = (get_total_physique()) * 10 // The one who is  resisting physique
+		var/grabber_physique = (G.st_get_stat(STAT_STRENGTH)) * 10 // The one who is grabbing physique
+		var/resist_physique = (st_get_stat(STAT_STRENGTH)) * 10 // The one who is  resisting physique
 		resist_chance = ((resist_chance + (resist_physique - grabber_physique))/altered_grab_state)
 		if(prob(resist_chance))
 			visible_message("<span class='danger'>[src] breaks free of [pulledby]'s grip!</span>", \
@@ -1995,38 +2049,13 @@
 
 	return attack_result
 
-//Making a proc for each of these.
-
-/mob/living/proc/get_total_physique()
-	return physique + additional_physique
-
-/mob/living/proc/get_total_dexterity()
-	return dexterity + additional_dexterity
-
-/mob/living/proc/get_total_social()
-	if(iscathayan(src))
-		if(mind?.dharma?.animated == "Yin")
-			return max(0, social + additional_social - 2)
-	return social + additional_social
-
-/mob/living/proc/get_total_mentality()
-	return mentality + additional_mentality
-
-/mob/living/proc/get_total_blood()
-	return blood + additional_blood
-
-/mob/living/proc/get_total_lockpicking()
-	return lockpicking + additional_lockpicking
-
-/mob/living/proc/get_total_athletics()
-	return athletics + additional_athletics
 
 /mob/living/proc/climb_wall(turf/above_turf)
 	if(body_position != STANDING_UP)
 		return
 	if(above_turf && istype(above_turf, /turf/open/openspace))
-		var/total_dexterity = get_total_dexterity()
-		var/total_athletics = get_total_athletics()
+		var/total_dexterity = st_get_stat(STAT_DEXTERITY)
+		var/total_athletics = st_get_stat(STAT_ATHLETICS)
 		to_chat(src, "<span class='notice'>You start climbing up...</span>")
 
 		var/result = do_after(src, 50 - (total_dexterity + total_athletics * 5), src)

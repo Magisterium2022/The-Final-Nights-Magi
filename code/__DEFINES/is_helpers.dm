@@ -71,6 +71,7 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 #define ishuman(A) (istype(A, /mob/living/carbon/human))
 
 #define isnpc(A) (istype(A, /mob/living/carbon/human/npc))
+#define issabbat(A) (istype(A, /mob/living/carbon/human/npc/sabbat))
 
 //Human sub-species
 #define isabductor(A) (is_species(A, /datum/species/abductor))
@@ -92,23 +93,26 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 #define isdullahan(A) (is_species(A, /datum/species/dullahan))
 #define ismonkey(A) (is_species(A, /datum/species/monkey))
 #define iskindred(A) (is_species(A,/datum/species/kindred))
+#define iszulo(A) (is_species(A,/datum/species/kindred/zulo)) // TFN ADDITION - Tzimisce Rework part 2
 #define iscathayan(A) (is_species(A,/datum/species/kuei_jin))
 #define isghoul(A) (is_species(A,/datum/species/ghoul))
 #define isgarou(A) (is_species(A,/datum/species/garou))
+#define iskinfolk(A) (HAS_TRAIT(A, TRAIT_KINFOLK)) // TFN ADDITION -- Kinfolk Merit
+#define issupernatural(A) (isgarou(A) || isghoul(A) || iscathayan(A) || iskindred(A) || iswerewolf(A) || iscrinos(A) || islupus(A) || iscorax(A) || iscorvid(A) || iscoraxcrinos(A))
 
 //more carbon mobs
 
-#define iswerewolf(A) (istype(A, /mob/living/simple_animal/werewolf))
+#define iswerewolf(A) (istype(A, /mob/living/carbon/werewolf))
 
-#define iscrinos(A) (istype(A, /mob/living/simple_animal/werewolf/crinos))
+#define iscrinos(A) (istype(A, /mob/living/carbon/werewolf/crinos))
 
-#define islupus(A) (istype(A, /mob/living/simple_animal/werewolf/lupus))
+#define islupus(A) (istype(A, /mob/living/carbon/werewolf/lupus))
 
-#define iscorax(A) (istype(A, /mob/living/simple_animal/werewolf/corax))
+#define iscorax(A) (istype(A, /mob/living/carbon/werewolf/corax))
 
-#define iscorvid(A) (istype(A, /mob/living/simple_animal/werewolf/lupus/corvid))
+#define iscorvid(A) (istype(A, /mob/living/carbon/werewolf/lupus/corvid))
 
-#define iscoraxcrinos(A) (istype(A, /mob/living/simple_animal/werewolf/corax/corax_crinos)) //not sure if necessary, not taking chances
+#define iscoraxcrinos(A) (istype(A, /mob/living/carbon/werewolf/corax/corax_crinos)) //not sure if necessary, not taking chances
 
 #define isalien(A) (istype(A, /mob/living/carbon/alien))
 

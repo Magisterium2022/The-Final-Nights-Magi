@@ -17,7 +17,7 @@
 	if (is_right_clicking)
 		switch (pre_attack_secondary(target, user, params))
 			if (SECONDARY_ATTACK_CALL_NORMAL)
-				pre_attack_result = pre_attack(src, user, params)
+				pre_attack_result = pre_attack(target, user, params)
 			if (SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN)
 				return TRUE
 			if (SECONDARY_ATTACK_CONTINUE_CHAIN)
@@ -25,7 +25,7 @@
 			else
 				CRASH("pre_attack_secondary must return an SECONDARY_ATTACK_* define, please consult code/__DEFINES/combat.dm")
 	else
-		pre_attack_result = pre_attack(src, user, params)
+		pre_attack_result = pre_attack(target, user, params)
 
 	if(pre_attack_result)
 		return TRUE
@@ -193,9 +193,9 @@
 			M = user
 		if(eyestab(M,user))
 			return
-	if(!force)
+	if(!force || !user.combat_mode) // tap tap tap
 		playsound(loc, 'sound/weapons/tap.ogg', get_clamped_volume(), TRUE, -1)
-	else if(hitsound)
+	else if(hitsound && user.combat_mode)
 		playsound(loc, hitsound, get_clamped_volume(), TRUE, extrarange = stealthy_audio ? SILENCED_SOUND_EXTRARANGE : -1, falloff_distance = 0)
 
 	M.lastattacker = user.real_name
@@ -232,9 +232,9 @@
 		CRASH("attacked_by() was called on an object that doesnt use integrity!")
 	if(!attacking_item.force)
 		return
-
+	var/item_force = (attacking_item.force) * (user.st_get_stat(STAT_MELEE) * 0.4)//TFN EDIT ADDITION
 	var/no_damage = TRUE
-	if(take_damage(attacking_item.force, attacking_item.damtype, MELEE, 1))
+	if(take_damage(item_force, attacking_item.damtype, MELEE, 1)) //TFN EDIT, ORGIINAL: if(take_damage(attacking_item.force, attacking_item.damtype, MELEE, 1))
 		no_damage = FALSE
 	//only witnesses close by and the victim see a hit message.
 	log_combat(user, src, "attacked", attacking_item)
@@ -256,6 +256,9 @@
 
 	send_item_attack_message(attacking_item, user, targeting_human_readable, targeting)
 
+	if(!user.combat_mode)
+		return FALSE
+
 	var/armor_block = min(run_armor_check(
 			def_zone = targeting,
 			attack_flag = MELEE,
@@ -269,9 +272,8 @@
 	var/meleemod = 1
 	if(istype(user, /mob/living/carbon/human))
 		var/mob/living/carbon/human/H = user
-		if(H.dna?.species)
-			meleemod = H.dna.species.meleemod
-	damage = damage * meleemod
+		meleemod = (meleemod * (((H.st_get_stat(STAT_MELEE))) + ((H.st_get_stat(STAT_STRENGTH)))))
+	damage = damage + meleemod
 	//TFN EDIT END -- Fixes Meleemods for Weapons
 
 	var/wounding = attacking_item.wound_bonus
@@ -362,8 +364,8 @@
 							span_danger("[src] is knocked senseless!"),
 							span_userdanger("You're knocked senseless!"),
 						)
-						if(get_confusion() < 20 SECONDS)
-							set_confusion(20 SECONDS)
+						if(get_confusion() < 10 SECONDS) // TFN EDIT CHANGE - Lines 365 and 366 reduced timers from 20 SECONDS to 10 and 5 SECONDS, respectively.
+							set_confusion(5 SECONDS)
 						adjust_blurriness(20 SECONDS)
 					if(prob(10))
 						gain_trauma(/datum/brain_trauma/mild/concussion)
@@ -433,6 +435,8 @@
 			return clamp(w_class * 6, 10, 100) // Multiply the item's weight class by 6, then clamp the value between 10 and 100
 
 /mob/living/proc/send_item_attack_message(obj/item/I, mob/living/user, hit_area, def_zone)
+	if(!user.combat_mode)
+		return
 	if(!I.force && !length(I.attack_verb_simple) && !length(I.attack_verb_continuous))
 		return
 	var/message_verb_continuous = length(I.attack_verb_continuous) ? "[pick(I.attack_verb_continuous)]" : "attacks"

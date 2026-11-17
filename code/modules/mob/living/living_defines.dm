@@ -2,7 +2,7 @@
 	see_invisible = SEE_INVISIBLE_LIVING
 	sight = 0
 	see_in_dark = 2
-	hud_possible = list(HEALTH_HUD,STATUS_HUD,ANTAG_HUD,NANITE_HUD,DIAG_NANITE_FULL_HUD,GLAND_HUD)
+	hud_possible = list(HEALTH_HUD,STATUS_HUD,ANTAG_HUD,NANITE_HUD,DIAG_NANITE_FULL_HUD,GLAND_HUD,SENSEWYRM_HUD) // TFN EDIT - Remakes the Theurge's "Sense Wyrm" gift - added ',SENSEWYRM_HUD)'
 
 	hud_type = /datum/hud/living
 
@@ -181,23 +181,6 @@
 
 	var/total_cleaned = 0
 
-	var/physique = 1
-	var/dexterity = 1
-	var/social = 1
-	var/mentality = 1
-	var/lockpicking = 0
-	var/athletics = 0
-	var/blood = 1
-
-	var/additional_physique = 0
-	var/additional_dexterity = 0
-	var/additional_mentality = 0
-	var/additional_social = 0
-	var/additional_blood = 0
-	var/additional_lockpicking = 0
-	var/additional_athletics = 0
-	var/more_companions = 0
-
 	var/info_known = INFO_KNOWN_UNKNOWN
 
 	var/last_message
@@ -221,15 +204,19 @@
 
 	var/frenzy_chance_boost = 10
 
-	var/last_bloodpool_restore = 0
+	COOLDOWN_DECLARE(bloodpool_restore)
 
 	var/list/knowscontacts = null
 
 	var/mysticism_knowledge = FALSE
 
-	var/thaumaturgy_knowledge = FALSE
-
 	var/necromancy_knowledge = FALSE
+
+// TFN ADDITION START - Paths
+	var/research_points = 0
+	var/list/artifact_owned_amounts = list()// allows for the tracking of multiple artifacts to prevent linear 'stacking', instead introducing exponential decay
+	var/collected_souls = 0
+// TFN ADDITION END - Paths
 
 	var/elysium_checks = 0
 	var/bloodhunted = FALSE
@@ -252,7 +239,6 @@
 	var/last_bloodpower_click = 0
 	var/last_drinkblood_click = 0
 	var/harm_focus = SOUTH
-	var/masquerade_votes = 0
 	var/list/voted_for = list()
 	var/true_real_name
 	var/died_already = FALSE
@@ -260,7 +246,7 @@
 	var/bloodpool = 5
 	var/maxbloodpool = 5
 	var/generation = 13
-	var/masquerade = 5
+	var/masquerade_score = 5
 	var/datum/weakref/conditioner
 	var/conditioned = FALSE
 	var/last_masquerade_violation = 0
@@ -301,7 +287,7 @@
 	var/inspired = FALSE
 	var/last_gnosis_buff = 0
 	var/last_rage_gain = 0
-	var/last_veil_restore = 0
+	COOLDOWN_DECLARE(veil_restore)
 
 	var/list/beastmaster = list()
 
@@ -311,7 +297,13 @@
 	var/frenzy_hardness = 6
 	var/last_frenzy_check = 0
 	var/mob/living/frenzy_target = null
+	var/they_can_move = FALSE // for mob bumps
 
 
 	//If we are currently leaning on something, and what that object is
 	var/atom/leaned_object
+
+	//List for icons created for obfuscated mobs
+	var/list/obf_icons // TFN ADDITION - Adding an Obfuscate Indicator
+
+	var/datum/storyteller_stats/storyteller_stat_holder

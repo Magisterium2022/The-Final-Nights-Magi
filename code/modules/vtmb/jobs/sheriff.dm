@@ -38,7 +38,7 @@
 	minimum_vampire_age = 30
 	minimal_masquerade = 5
 	allowed_species = list("Vampire")
-	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_GANGREL, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_BANU_HAQIM, CLAN_TZIMISCE, CLAN_SETITES, CLAN_LASOMBRA)
+	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_GANGREL, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_BANU_HAQIM, CLAN_LASOMBRA)
 
 	known_contacts = list("Prince","Seneschal","Tremere Regent","Dealer","Primogens","Voivode")
 
@@ -49,7 +49,6 @@
 	name = "Sheriff"
 	jobtype = /datum/job/vamp/sheriff
 
-	ears = /obj/item/p25radio
 	id = /obj/item/card/id/sheriff
 	uniform = /obj/item/clothing/under/vampire/sheriff
 	belt = /obj/item/storage/belt/vampire/sheathe/rapier

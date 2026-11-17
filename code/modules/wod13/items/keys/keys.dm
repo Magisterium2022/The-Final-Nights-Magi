@@ -23,6 +23,7 @@
 		"clerk",
 		"chantry",
 		"theatre",
+		"ventrueGreenroom",
 		"milleniumCommon",
 		"primogen"
 	)
@@ -35,6 +36,7 @@
 		"camarilla",
 		"prince",
 		"theatre",
+		"ventrueGreenroom",
 		"milleniumCommon",
 		"primogen",
 		"clerk"
@@ -48,6 +50,7 @@
 		"prince",
 		"clerk",
 		"theatre",
+		"ventrueGreenroom",
 		"milleniumCommon",
 		"primogen"
 	)
@@ -58,6 +61,8 @@
 	accesslocks = list(
 		"milleniumCommon",
 		"clerk",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#bd3327"
@@ -83,21 +88,25 @@
 		"chantry",
 		"milleniumCommon",
 		"primogen",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 
 /obj/item/vamp/keys/anarch
 	name = "Anarch keys"
 	accesslocks = list(
-		"anarch"
+		"anarch",
+		"biker_bar"
 	)
 	color = "#434343"
 
 /obj/item/vamp/keys/bar
-	name = "Barkeeper keys"
+	name = "Bar Owner's keys"
 	accesslocks = list(
-		"bar",
+		"baron",
 		"anarch",
+		"biker_bar"
 	)
 	color = "#434343"
 
@@ -141,6 +150,8 @@
 		"primogen",
 		"primLasombra",
 		"milleniumCommon",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#4b039c"
@@ -151,6 +162,13 @@
 		"trujah",
 		"tmr"
 	)
+
+/obj/item/vamp/keys/setite
+	name = "community center keys"
+	accesslocks = list(
+		"setite"
+	)
+	color = "#09350cff"
 
 /obj/item/vamp/keys/kiasyd
 	name = "Solitary keys"
@@ -168,7 +186,7 @@
 	)
 
 /obj/item/vamp/keys/salubri
-	name = "Conspiracy keys"
+	name = "Veterinary keys"
 	accesslocks = list(
 		"salubri"
 	)
@@ -203,7 +221,8 @@
 /obj/item/vamp/keys/malkav
 	name = "Insane keys"
 	accesslocks = list(
-		"malkav"
+		"malkav",
+		"psych"
 	)
 	color = "#8cc4ff"
 
@@ -211,10 +230,13 @@
 	name = "Really insane keys"
 	accesslocks = list(
 		"primMalkav",
+		"psych",
 		"malkav",
 		"primogen",
 		"clinic",
 		"milleniumCommon",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#2c92ff"
@@ -246,6 +268,8 @@
 		"primBanu",
 		"police",
 		"milleniumCommon",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#05037e"
@@ -262,6 +286,8 @@
 		"strip",
 		"primogen",
 		"milleniumCommon",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#ff2fc4"
@@ -280,6 +306,8 @@
 		"nosferatu",
 		"primogen",
 		"milleniumCommon",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#367c31"
@@ -298,6 +326,8 @@
 		"brujah",
 		"primogen",
 		"milleniumCommon",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#ec8f3e"
@@ -305,7 +335,8 @@
 /obj/item/vamp/keys/ventrue
 	name = "Businessy keys"
 	accesslocks = list(
-		"ventrue"
+		"ventrue",
+		"ventrueGreenroom"
 	)
 	color = "#f6ffa7"
 
@@ -316,6 +347,8 @@
 		"ventrue",
 		"milleniumCommon",
 		"primogen",
+		"theatre",
+		"ventrueGreenroom",
 		"camarilla"
 	)
 	color = "#e8ff29"
@@ -345,7 +378,8 @@
 /obj/item/vamp/keys/clinic
 	name = "Clinic keys"
 	accesslocks = list(
-		"clinic"
+		"clinic",
+		"psych"
 	)
 
 /obj/item/vamp/keys/clinics_director
@@ -354,7 +388,8 @@
 		"clinic",
 		"clinicsec",
 		"director",
-		"malkav"
+		"malkav",
+		"psych"
 	)
 
 //===========================POLICE KEYS===========================
@@ -370,8 +405,8 @@
 		"police",
 		"glowie"
 	)
-/obj/item/vamp/keys/police/districtattorney
-	name = "District Attorney keys"
+/obj/item/vamp/keys/police/assistantdistrictattorney
+	name = "Assistant district attorney keys"
 	accesslocks = list(
 		"police"
 	)
@@ -383,27 +418,27 @@
 	)
 
 /obj/item/vamp/keys/police/secure
-	name = "Sergeant Police keys"
+	name = "Police sergeant keys"
 	accesslocks = list(
 		"police",
 		"police_secure"
 	)
 
-/obj/item/vamp/keys/police/secure/chief
-	name = "Chief of Police keys"
+/obj/item/vamp/keys/police/secure/captain
+	name = "Police captain keys"
 	accesslocks = list(
 		"dispatch",
 		"police",
 		"police_secure",
-		"police_chief"
+		"police_captain"
 	)
 
 //===========================MISC KEYS===========================
 
-/obj/item/vamp/keys/triads
+/obj/item/vamp/keys/axes
 	name = "Rusty keys"
 	accesslocks = list(
-		"triad",
+		"axes",
 		"laundromat"
 	)
 

@@ -30,24 +30,28 @@
 	var/list/fax_history = list()
 	/// List of types which should always be allowed to be faxed
 	var/static/list/allowed_types = list(
+		/obj/item/canvas,
 		/obj/item/paper,
 		/obj/item/photo,
-		/obj/item/tcgcard
+		/obj/item/tcgcard,
 	)
 	/// List of types which should be allowed to be faxed if hacked
 	var/static/list/exotic_types = list(
+		/obj/item/card,
+		/obj/item/food/breadslice,
 		/obj/item/food/pizzaslice,
 		/obj/item/food/salami,
 		/obj/item/throwing_star,
-		/obj/item/stack/spacecash,
 		/obj/item/holochip,
-		/obj/item/card
+		/obj/item/stack/spacecash,
+		/obj/item/throwing_star,
 	)
 	/// List with a fake-networks(not a fax actually), for request manager.
 	var/list/special_networks = list(
 		list(fax_name = "High Council", fax_id = "camarillaadmin", color = "teal", emag_needed = FALSE),
 		list(fax_name = "Free State Movement", fax_id = "anarchsadmin", color = "red", emag_needed = FALSE),
 		list(fax_name = "Federal Government", fax_id = "policeadmin", color = "blue", emag_needed = FALSE),
+		list(fax_name = "Federal Bureau of Investigation", fax_id = "fbiadmin", color = "blue", emag_needed = FALSE),
 		list(fax_name = "Pentex Corporate", fax_id = "endronadmin", color = "green", emag_needed = FALSE),
 		list(fax_name = "Element Relay", fax_id = "aasimitesadmin", color = "purple", emag_needed = FALSE),
 		list(fax_name = "Nightwolf Corporate", fax_id = "glasswalkeradmin", color = "grey", emag_needed = FALSE),
@@ -69,6 +73,10 @@
 /obj/machinery/fax/admin/police
 	fax_name = "Federal Government"
 	fax_id = "policeadmin"
+
+/obj/machinery/fax/admin/fbi
+	fax_name = "Federal Bureau of Investigation"
+	fax_id = "fbiadmin"
 
 /obj/machinery/fax/admin/endron
 	fax_name = "Pentex Corporate"
@@ -101,10 +109,15 @@
 	fax_id = "police"
 	special_networks = list(list(fax_name = "Federal Government", fax_id = "policeadmin", color = "blue", emag_needed = FALSE))
 
+/obj/machinery/fax/fbi
+	fax_name = "FBI Field Office"
+	fax_id = "fbi"
+	special_networks = list(list(fax_name = "Federal Bureau of Investigation", fax_id = "fbiadmin", color = "blue", emag_needed = FALSE))
+
 /obj/machinery/fax/endron
 	fax_name = "Endron International HQ"
 	fax_id = "endron"
-	special_networks = list(list(fax_name = "Pentex Corporate", fax_id = "endronadmin", color = "green", emag_needed = FALSE))
+	special_networks = list(list(fax_name = "Endron Executive Board", fax_id = "endronadmin", color = "green", emag_needed = FALSE))
 
 /obj/machinery/fax/aasimites
 	fax_name = "Chubby Lion Coffee Shop"

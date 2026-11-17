@@ -34,6 +34,12 @@
 	duration_length = 0.5 SECONDS
 	cooldown_length = 5 SECONDS
 
+/datum/discipline_power/serpentis/the_eyes_of_the_serpent/pre_activation_checks(mob/living/target)
+	if(issupernatural(target))
+		if(!SSroll.storyteller_roll((target.st_get_stat(STAT_TEMPORARY_WILLPOWER)), 9, FALSE, list(target, owner)))
+			return FALSE
+	return TRUE
+
 /datum/discipline_power/serpentis/the_eyes_of_the_serpent/can_activate_untargeted(alert)
 	. = ..()
 	if (owner?.is_eyes_covered())
@@ -110,7 +116,8 @@
 
 	level = 3
 	check_flags = DISC_CHECK_CAPABLE | DISC_CHECK_IMMOBILE | DISC_CHECK_LYING
-
+	vitae_cost = 1
+	willpower_cost = 1
 	violates_masquerade = TRUE
 
 	duration_length = 5 SECONDS
@@ -129,26 +136,32 @@
 
 	level = 4
 	check_flags = DISC_CHECK_CAPABLE | DISC_CHECK_IMMOBILE | DISC_CHECK_LYING
-	vitae_cost = 2
+	vitae_cost = 1
 
 	violates_masquerade = TRUE
 
-	duration_length = 15 SECONDS
 	cooldown_length = 30 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/cobra/BC
+
+
+/datum/discipline_power/serpentis/the_form_of_the_cobra/pre_activation_checks()
+	. = ..()
+	if(HAS_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING))
+		to_chat(owner, span_warning("YOU ALREADY ARE TRANSFORMING!"))
+		return FALSE
+	else
+		ADD_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+	to_chat(owner, span_warning("You begin transforming..."))
+	if (do_after(owner, 6 SECONDS, timed_action_flags = (IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM )))
+		REMOVE_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+		return TRUE
 
 /datum/discipline_power/serpentis/the_form_of_the_cobra/activate()
 	. = ..()
 	if(!BC)
 		BC = new(owner)
 	BC.Shapeshift(owner)
-
-/datum/discipline_power/serpentis/the_form_of_the_cobra/deactivate()
-	. = ..()
-	BC.Restore(BC.myshape)
-	owner.Stun(1.5 SECONDS)
-	owner.do_jitter_animation(3 SECONDS)
 
 /obj/effect/proc_holder/spell/targeted/shapeshift/cobra
 	name = "Cobra"
@@ -172,8 +185,8 @@
 	health = 300
 	butcher_results = list(/obj/item/stack/human_flesh = 20)
 	harm_intent_damage = 5
-	melee_damage_lower = 50
-	melee_damage_upper = 50
+	melee_damage_lower = 30
+	melee_damage_upper = 30
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/slash.ogg'
@@ -242,3 +255,69 @@
 	. = ..()
 	if(own)
 		own.death()
+
+//TYPHONIC BEAST
+/datum/discipline_power/serpentis/typhonic_beast
+	name = "Typhonic Beast"
+	desc = "Transform into the Typhonic Animal."
+
+	level = 6
+	check_flags = DISC_CHECK_CAPABLE | DISC_CHECK_IMMOBILE | DISC_CHECK_LYING
+	vitae_cost = 4
+
+	violates_masquerade = TRUE
+
+	duration_length = 30 SECONDS
+	cooldown_length = 1 MINUTES
+
+	var/obj/effect/proc_holder/spell/targeted/shapeshift/typhon/T
+
+/datum/discipline_power/serpentis/typhonic_beast/activate()
+	. = ..()
+	if(!T)
+		T = new(owner)
+	T.Shapeshift(owner)
+
+/datum/discipline_power/serpentis/typhonic_beast/deactivate()
+	. = ..()
+	T.Restore(T.myshape)
+	owner.Stun(1.5 SECONDS)
+	owner.do_jitter_animation(3 SECONDS)
+
+/obj/effect/proc_holder/spell/targeted/shapeshift/typhon
+	name = "Typhon"
+	desc = "Take on the shape of a Typhonic Beast."
+	charge_max = 15 SECONDS
+	cooldown_min = 15 SECONDS
+	convert_damage = FALSE
+	revert_on_death = TRUE
+	die_with_shapeshifted_form = FALSE
+	shapeshift_type = /mob/living/simple_animal/hostile/typhon
+
+/mob/living/simple_animal/hostile/typhon
+	name = "Typhonic Form"
+	desc = "Praise Set!"
+	icon = 'icons/mob/lavaland/64x64megafauna.dmi'
+	icon_state = "shadow"
+	icon_living = "shadow"
+	mob_biotypes = MOB_ORGANIC | MOB_HUMANOID
+	speak_chance = 0
+	speed = -1
+	maxHealth = 1000
+	health = 1000
+	butcher_results = list(/obj/item/stack/human_flesh = 20)
+	harm_intent_damage = 5
+	melee_damage_lower = 80
+	melee_damage_upper = 90
+	attack_verb_continuous = "slashes"
+	attack_verb_simple = "slash"
+	attack_sound = 'sound/weapons/slash.ogg'
+	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
+	minbodytemp = 0
+	bloodpool = 10
+	maxbloodpool = 10
+	pixel_w = -8
+
+/datum/discipline_power/serpentis/typhonic_beast/post_gain()
+	. = ..()
+	owner.mind.AddSpell(/obj/effect/proc_holder/spell/cone/staggered/entropic_plume)

@@ -4,7 +4,6 @@
 	department_head = list("Endron International")
 	faction = "Vampire"
 
-	minimal_renownrank = 4
 	total_positions = 1
 	spawn_positions = 1
 	supervisors = "The Board and Yourself."
@@ -27,12 +26,13 @@
 	display_order = JOB_DISPLAY_ORDER_ENDRON
 
 	minimal_masquerade = 5
-	allowed_species = list("Werewolf")
+	allowed_species = list("Werewolf", "Vampire", "Human")
 	allowed_tribes = list("Black Spiral Dancers")
+	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
 
 	known_contacts = null
 
-	v_duty = "You are the current branch leader for the Endron Oil Refinery, operating out of San Francisco. Your job is to fuel production, keep your clowns in line, and to bring forth the banes that will ultimately allow the Wyrm to prevail over the Weaver."
+	v_duty = "You are the current Leader of the Endron San Francisco Branch. Your job is to fuel production, keep your clowns in line, and to bring forth the banes that will ultimately allow the Wyrm to prevail over the Weaver. Mind your Security Team, they are more than willing to turn on you if you give them a reason."
 	experience_addition = 25
 
 /datum/outfit/job/garou/endronlead
@@ -40,9 +40,8 @@
 	jobtype = /datum/job/vamp/garou/spiral/lead
 
 	id = /obj/item/card/id/garou/spiral/lead
-	ears = /obj/item/p25radio
 	uniform =  /obj/item/clothing/under/pentex/pentex_executive_suit
-	shoes = /obj/item/clothing/shoes/vampire/businessblack
+	shoes = /obj/item/clothing/shoes/vampire/white
 	suit = /obj/item/clothing/suit/pentex/pentex_labcoat_alt
 	l_pocket = /obj/item/vamp/phone/endron_lead
 	r_pocket = /obj/item/vamp/keys/pentex/leader
@@ -57,7 +56,7 @@
 	..()
 	if(H.gender == FEMALE)
 		uniform = /obj/item/clothing/under/pentex/pentex_executiveskirt
-		shoes = /obj/item/clothing/shoes/vampire/heels
+		shoes = /obj/item/clothing/shoes/vampire/heels/white
 
 /obj/effect/landmark/start/garou/spiral/lead
 	name = "Endron Branch Lead"
@@ -74,7 +73,6 @@
 	supervisors = "The Branch Lead, and yourself."
 	selection_color = "#015334"
 
-	minimal_renownrank = 3
 	req_admin_notify = 1
 	minimal_player_age = 25
 	exp_requirements = 150
@@ -92,22 +90,21 @@
 	display_order = JOB_DISPLAY_ORDER_ENDRON
 
 	minimal_masquerade = 5
-	allowed_species = list("Werewolf", "Vampire", "Human")
+	allowed_species = list("Werewolf", "Vampire", "Human", "Ghoul")
 	allowed_tribes = list("Black Spiral Dancers")
-	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_DAUGHTERS_OF_CACOPHONY, CLAN_SALUBRI, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
+	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
 
 	known_contacts = null
 
-	v_duty = "You are an acting executive for the Endron Oil Refinery, operating out of San Francisco. With discretion to the Branch Leader, a position you may aim for, your job is to fuel production, aid in bringing forth banes, and sate the heads of the Wyrm. Expand!"
+	v_duty = "You are an Executive for Endron International, operating out of San Francisco. With discretion to the Branch Leader, a position you may aim for, your job is to fuel production, aid in bringing forth banes, and sate the heads of the Wyrm. Expand!"
 
 /datum/outfit/job/garou/endronexec
 	name = "Endron Executive"
 	jobtype = /datum/job/vamp/garou/spiral/executive
 
 	id = /obj/item/card/id/garou/spiral/executive
-	ears = /obj/item/p25radio
 	uniform =  /obj/item/clothing/under/pentex/pentex_executive_suit
-	shoes = /obj/item/clothing/shoes/vampire/businessblack
+	shoes = /obj/item/clothing/shoes/vampire/white
 	l_pocket = /obj/item/vamp/phone/endron_exec
 	r_pocket = /obj/item/vamp/keys/pentex/leader
 	backpack_contents = list(/obj/item/phone_book=1, /obj/item/passport=1, /obj/item/cockclock=1, /obj/item/flashlight=1, /obj/item/vamp/creditcard/seneschal=1)
@@ -121,7 +118,7 @@
 	..()
 	if(H.gender == FEMALE)
 		uniform = /obj/item/clothing/under/pentex/pentex_executiveskirt
-		shoes = /obj/item/clothing/shoes/vampire/heels
+		shoes = /obj/item/clothing/shoes/vampire/heels/white
 
 /obj/effect/landmark/start/garou/spiral/executive
 	name = "Endron Executive"
@@ -133,10 +130,9 @@
 	department_head = list("Endron International")
 	faction = "Vampire"
 
-	minimal_renownrank = 2
 	total_positions = 1
 	spawn_positions = 1
-	supervisors = "The Branch Lead."
+	supervisors = "Pentex and the Global Endron Executive Board."
 	selection_color = "#015334"
 
 	req_admin_notify = 1
@@ -156,23 +152,23 @@
 	display_order = JOB_DISPLAY_ORDER_ENDRON
 
 	minimal_masquerade = 4
-	allowed_species = list("Werewolf")
+	allowed_species = list("Werewolf", "Vampire")
 	allowed_tribes = list("Black Spiral Dancers")
+	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
 
 	known_contacts = null
 
-	v_duty = "You are the internal affairs agent operating in the Endron Oil Refinery. You know the bloody and vile needs commanded of destruction will lead to jeopardy, and your duty is to see excellence on task rewarded and acknowledged, and curb the invariable atrocities that could endanger the greater plans of Pentex."
+	v_duty = "You are an Internal Affairs Agent operating in the Endron Water Treatment Plant. You know the bloody and vile needs commanded of destruction will lead to jeopardy, and your duty is to see excellence on task rewarded and acknowledged, and curb the invariable atrocities that could endanger the greater plans of Pentex."
 
 /datum/outfit/job/garou/endronaffairs
 	name = "Endron Internal Affairs"
-	jobtype = /datum/job/vamp/garou/spiral/executive
+	jobtype = /datum/job/vamp/garou/spiral/affairs
 
 	id = /obj/item/card/id/garou/spiral/affairs
-	ears = /obj/item/p25radio
 	uniform =  /obj/item/clothing/under/pentex/pentex_suit
 	shoes = /obj/item/clothing/shoes/vampire/businessblack
 	l_pocket = /obj/item/vamp/phone/endron_affairs
-	r_pocket = /obj/item/vamp/keys/pentex
+	r_pocket = /obj/item/vamp/keys/pentex/leader
 	backpack_contents = list(/obj/item/phone_book=1, /obj/item/passport=1, /obj/item/cockclock=1, /obj/item/flashlight=1, /obj/item/veil_contract, /obj/item/vamp/creditcard/rich=1)
 
 
@@ -199,7 +195,7 @@
 	minimal_renownrank = 3
 	total_positions = 1
 	spawn_positions = 1
-	supervisors = "The Branch Lead."
+	supervisors = "The Wyrm... and the Branch Lead."
 	selection_color = "#015334"
 
 	req_admin_notify = 1
@@ -225,14 +221,13 @@
 
 	known_contacts = null
 
-	v_duty = "You are an acting chief of security for the Endron Oil Refinery, operating out of San Francisco. With discretion to the Branch Leader, your job is to keep the complex and it's source of taint under control with the help of your security team, and to turn over contract violators to internal affairs or the executives."
+	v_duty = "You are the Chief of Security for the Endron Water Treatment Plant, operating out of San Francisco. You have control of the local Dancer Pack as your Security Team. You may have to follow orders from those you see as below you. Do not forget your true allegiances, however."
 
 /datum/outfit/job/garou/endronsecchief
 	name = "Endron Chief of Security"
 	jobtype = /datum/job/vamp/garou/spiral/secchief
 
 	id = /obj/item/card/id/garou/spiral/secchief
-	ears = /obj/item/p25radio
 	uniform =  /obj/item/clothing/under/pentex/pentex_turtleneck
 	shoes = /obj/item/clothing/shoes/vampire/jackboots
 	gloves = /obj/item/clothing/gloves/vampire/work
@@ -261,7 +256,7 @@
 
 	total_positions = 5
 	spawn_positions = 5
-	supervisors = "The Branch Lead and the Security Chief."
+	supervisors = "The Wyrm, the Security Chief and the Branch Lead."
 	selection_color = "#015334"
 
 	req_admin_notify = 1
@@ -282,20 +277,18 @@
 	display_order = JOB_DISPLAY_ORDER_ENDRON
 
 	minimal_masquerade = 3
-	allowed_species = list("Werewolf", "Vampire", "Human")
+	allowed_species = list("Werewolf")
 	allowed_tribes = list("Black Spiral Dancers")
-	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_DAUGHTERS_OF_CACOPHONY, CLAN_SALUBRI, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
 
 	known_contacts = null
 
-	v_duty = "You are an acting security for the Endron Oil Refinery, operating out of San Francisco. Under the chief of security's direction, your job is to keep the complex free of nosy meddlers, pick up contract violators, and to assist the chief in tackling threats to corporate assets."
+	v_duty = "You are a Security Agent for the Endron Water Treatment Plant, operating out of San Francisco. While you are a mighty Garou, your superiors may not be. Follow orders, first and foremost, but do not abandon your true allegiance."
 
 /datum/outfit/job/garou/endronsec
 	name = "Endron Security Agent"
 	jobtype = /datum/job/vamp/garou/spiral/sec
 
 	id = /obj/item/card/id/garou/spiral/sec
-	ears = /obj/item/p25radio
 	uniform =  /obj/item/clothing/under/pentex/pentex_shortsleeve
 	shoes = /obj/item/clothing/shoes/vampire/jackboots
 	gloves = /obj/item/clothing/gloves/vampire/work
@@ -319,7 +312,7 @@
 	allowed_species = list("Vampire", "Ghoul", "Human", "Werewolf")
 	department_head = list("Endron International")
 	allowed_tribes = list("Black Spiral Dancers", "Ronin")
-	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_DAUGHTERS_OF_CACOPHONY, CLAN_SALUBRI, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
+	allowed_bloodlines = list(CLAN_TRUE_BRUJAH, CLAN_BAALI, CLAN_BRUJAH, CLAN_TREMERE, CLAN_VENTRUE, CLAN_NOSFERATU, CLAN_TOREADOR, CLAN_MALKAVIAN, CLAN_GIOVANNI, CLAN_SETITES, CLAN_TZIMISCE, CLAN_LASOMBRA, CLAN_NONE)
 	faction = "Vampire"
 	selection_color = "#015334"
 
@@ -348,14 +341,13 @@
 
 	known_contacts = null
 
-	v_duty ="You are an employee for the Endron Oil Refinery, operating out of San Francisco. Your bosses can be a little strange; give credence to the security team and executives for tasks on the night shift, and avoid getting negative attention from the branch manager or internal affairs."
+	v_duty ="You are an Employee for Endron International, operating out of San Francisco. Your bosses can be a little strange; give credence to the security team and executives for tasks on the night shift, and avoid getting negative attention from the branch manager or internal affairs."
 
 /datum/outfit/job/garou/endron
 	name = "Endron Employee"
 	jobtype = /datum/job/vamp/garou/spiral/employee
 
 	id = /obj/item/card/id/garou/spiral/employee
-	ears = /obj/item/p25radio
 	uniform = /obj/item/clothing/under/pentex/pentex_longleeve
 	gloves = /obj/item/clothing/gloves/vampire/work
 	shoes = /obj/item/clothing/shoes/vampire

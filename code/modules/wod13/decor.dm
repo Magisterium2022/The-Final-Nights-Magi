@@ -34,6 +34,14 @@
 	.=..()
 	RemoveElement(/datum/element/climbable)
 
+// TFN EDIT START: Check for trait to allow phasing through doors
+/obj/structure/vampfence/CanPass(atom/movable/mover, turf/target)
+	. = ..()
+	if(istype(mover, /mob/living/carbon/human))
+		var/mob/living/carbon/human/H = mover
+		if(HAS_TRAIT(H, TRAIT_PASSDOOR))
+			return TRUE
+// TFN EDIT END
 
 /obj/structure/gargoyle
 	name = "\improper gargoyle"
@@ -821,6 +829,16 @@
 	anchored = TRUE
 	pixel_w = -16
 
+/obj/reddragon
+	name = "The Red Dragon"
+	desc = "Eat some spicy chicken and 'eggroll'!"
+	icon = 'code/modules/wod13/fastfood.dmi'
+	icon_state = "reddragon"
+	plane = GAME_PLANE
+	layer = CAR_LAYER
+	anchored = TRUE
+	pixel_w = -16
+
 /obj/underplate
 	name = "underplate"
 	icon = 'code/modules/wod13/props.dmi'
@@ -916,10 +934,7 @@
 		if(general_record.fields["name"] == mob_occupant.real_name)
 			qdel(general_record)
 
-	if(mob_occupant.bloodhunted)
-		SSbloodhunt.hunted -= mob_occupant
-		mob_occupant.bloodhunted = FALSE
-		SSbloodhunt.update_shit()
+	SSmasquerade.cryo_masquerade_breacher(mob_occupant, FALSE)
 
 	// Ghost and delete the mob.
 	if(!mob_occupant.get_ghost(TRUE))
@@ -1544,6 +1559,59 @@
 	. = ..()
 	icon_state = "showcase[rand(1, 7)]"
 
+/obj/structure/brazier
+	name = "brazier"
+	desc = "A metal pan atop stone brick, meant to hold fire. It is gas-powered, with a strange insignia around the gas knob center."
+	icon = 'code/modules/wod13/props.dmi'
+	icon_state = "brazier"
+	plane = GAME_PLANE
+	layer = SPACEVINE_LAYER
+	anchored = TRUE
+	density = TRUE
+	resistance_flags = FIRE_PROOF | LAVA_PROOF
+	light_range = 0
+	light_power = 0
+	light_color = "null"
+	var/lit = FALSE
+
+/obj/structure/brazier/attack_hand(mob/living/carbon/human/user, list/modifiers)
+	. = ..()
+	if(.)
+		return
+
+	if(lit)
+		turn_off(user)
+	else
+		turn_on(user)
+
+/obj/structure/brazier/proc/turn_on(mob/user)
+	if(lit)
+		return
+
+	lit = TRUE
+	icon_state = "brazier_lit"
+	light_range = 5
+	light_power = 3
+	light_color = "#ffa35c"
+	playsound(src, 'sound/wod13/pilotlight.ogg', 75, TRUE)
+	set_light(light_range, light_power, light_color)
+
+	if(user)
+		to_chat(user, span_notice("You turn the knob, lighting the [name]."))
+		user.visible_message(span_notice("[user] turns the knob, lighting the [name]."), null, null, 3)
+
+/obj/structure/brazier/proc/turn_off(mob/user)
+	if(!lit)
+		return
+
+	lit = FALSE
+	icon_state = "brazier"
+	set_light(0)
+
+	if(user)
+		to_chat(user, span_notice("You turn the knob backwards, extinguishing the [name]."))
+		user.visible_message(span_notice("[user] extinguishes the [name]."), null, null, 3)
+
 /obj/effect/decal/carpet
 	name = "carpet"
 	pixel_w = -16
@@ -1738,3 +1806,10 @@
 			burying = FALSE
 		else
 			burying = FALSE
+
+/obj/structure/shrinebox
+	name = "Box Shrine"
+	desc = "Holds offerings which bring good fortune, while incense burns."
+	icon = 'code/modules/wod13/props.dmi'
+	icon_state = "shrinebox"
+	anchored = TRUE

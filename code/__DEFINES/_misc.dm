@@ -358,13 +358,6 @@ GLOBAL_LIST_INIT(pda_styles, sort_list(list(MONO, VT, ORBITRON, SHARE)))
 #define TELEPORT_CHANNEL_CULT "cult"			//Cult teleportation, does whatever it wants (unless there's holiness)
 #define TELEPORT_CHANNEL_FREE "free"			//Anything else
 
-//Force the log directory to be something specific in the data/logs folder
-#define OVERRIDE_LOG_DIRECTORY_PARAMETER "log-directory"
-//Prevent the master controller from starting automatically
-#define NO_INIT_PARAMETER "no-init"
-//Force the config directory to be something other than "config"
-#define OVERRIDE_CONFIG_DIRECTORY_PARAMETER "config-directory"
-
 #define EGG_LAYING_MESSAGES list("lays an egg.","squats down and croons.","begins making a huge racket.","begins clucking raucously.")
 
 // Used by PDA and cartridge code to reduce repetitiveness of spritesheets
@@ -402,12 +395,6 @@ GLOBAL_LIST_INIT(pda_styles, sort_list(list(MONO, VT, ORBITRON, SHARE)))
 
 //Misc text define. Does 4 spaces. Used as a makeshift tabulator.
 #define FOURSPACES "&nbsp;&nbsp;&nbsp;&nbsp;"
-
-// art quality defines, used in datums/components/art.dm, elsewhere
-#define BAD_ART 12.5
-#define OK_ART 20
-#define GOOD_ART 25
-#define GREAT_ART 50
 
 // possible bitflag return values of intercept_zImpact(atom/movable/AM, levels = 1) calls
 #define FALL_INTERCEPTED		(1<<0) //Stops the movable from falling further and crashing on the ground

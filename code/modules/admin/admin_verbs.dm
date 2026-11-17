@@ -38,6 +38,7 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/toggle_canon,
 	/client/proc/reward_exp,
 	/client/proc/grant_discipline,
+	/client/proc/grant_path,            // TFN ADDITION - Paths
 	/client/proc/remove_discipline,
 	/client/proc/whitelist_panel,
 	/*
@@ -58,9 +59,6 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/getserverlogs,		/*for accessing server logs*/
 	/client/proc/getcurrentlogs,		/*for accessing server logs for the current round*/
 	/client/proc/cmd_admin_subtle_message,	/*send a message to somebody as a 'voice in their head'*/
-	/client/proc/cmd_admin_adjust_masquerade, /*adjusts the masquerade level of a player*/
-	/client/proc/cmd_admin_global_adjust_masquerade, /*adjusts the global masquerade*/
-//	/client/proc/cmd_admin_adjust_humanity, /*adjusts the humanity level of a player*/
 	/client/proc/cmd_admin_headset_message,	/*send a message to somebody through their headset as CentCom*/
 	/client/proc/cmd_admin_delete,		/*delete an instance/object/mob/etc*/
 	/client/proc/cmd_admin_check_contents,	/*displays the contents of an instance*/
@@ -98,7 +96,10 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/log_viewer_new,
 	/client/proc/fax_panel, /*send a paper to fax*/
 	/client/proc/openTicketManager,
-	/datum/admins/proc/display_tags
+	/client/proc/redact_word, //TFN ADDITION
+	/client/proc/allow_word, //TFN ADDITION
+	/datum/admins/proc/display_tags,
+	/datum/admins/proc/paintings_manager
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel))
 GLOBAL_PROTECT(admin_verbs_ban)
@@ -151,7 +152,8 @@ GLOBAL_PROTECT(admin_verbs_server)
 	/client/proc/panicbunker,
 	/client/proc/toggle_interviews,
 	/client/proc/toggle_hub,
-	/client/proc/toggle_cdn
+	/client/proc/toggle_cdn,
+	/client/proc/cmd_controller_view_ui
 	)
 GLOBAL_LIST_INIT(admin_verbs_debug, world.AVerbsDebug())
 GLOBAL_PROTECT(admin_verbs_debug)
@@ -201,6 +203,9 @@ GLOBAL_PROTECT(admin_verbs_debug)
 	#ifdef TESTING
 	/client/proc/check_missing_sprites,
 	#endif
+	#ifdef SENDMAPS_PROFILE
+	/client/proc/display_sendmaps,
+	#endif
 	/datum/admins/proc/create_or_modify_area,
 #ifdef REFERENCE_TRACKING
 	/datum/admins/proc/view_refs,
@@ -208,7 +213,9 @@ GLOBAL_PROTECT(admin_verbs_debug)
 #endif
 	/client/proc/check_timer_sources,
 	/client/proc/toggle_cdn,
-	/client/proc/allow_browser_inspect
+	/client/proc/allow_browser_inspect,
+	/client/proc/start_tracy,
+	/client/proc/queue_tracy
 	)
 GLOBAL_LIST_INIT(admin_verbs_possess, list(GLOBAL_PROC_REF(possess), GLOBAL_PROC_REF(release)))
 GLOBAL_PROTECT(admin_verbs_possess)
@@ -231,9 +238,6 @@ GLOBAL_LIST_INIT(admin_verbs_hideable, list(
 	/client/proc/admin_ghost,
 	/client/proc/toggle_view_range,
 	/client/proc/cmd_admin_subtle_message,
-	/client/proc/cmd_admin_adjust_masquerade,
-	/client/proc/cmd_admin_global_adjust_masquerade,
-//	/client/proc/cmd_admin_adjust_humanity,
 	/client/proc/cmd_admin_headset_message,
 	/client/proc/cmd_admin_check_contents,
 	/client/proc/admin_call_shuttle,
@@ -475,85 +479,6 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	log_admin("[key_name(usr)] toggled the round's canonicity. The round is [GLOB.canon_event ? "now canon." : "no longer canon."]")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Toggle Canon") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
-/client/proc/cmd_admin_global_adjust_masquerade()
-	set name = "Adjust Global Masquerade"
-	set category = "Admin"
-	if (!check_rights(R_ADMIN))
-		return
-
-
-	var/last_global_mask = SSmasquerade.total_level
-
-	var/value = input(usr, "Enter the Global Masquerade adjustment values(- will decrease, + will increase) :", "Global Masquerade Adjustment", 0) as num|null
-	if(value == null)
-		return
-
-	SSmasquerade.manual_adjustment = value
-
-	var/changed_mask = max(0,min(1000,last_global_mask + value))
-
-	SSmasquerade.fire()
-
-	var/msg = "<span class='adminnotice'><b>Global Masquerade Adjustment: [key_name_admin(usr)] has adjusted Global masquerade from [last_global_mask] to [changed_mask] with the value of : [value]. Real Masquerade Value with the other possible variables : [SSmasquerade.total_level]</b></span>"
-	log_admin("Global MasqAdjust: [key_name(usr)] has adjusted Global masquerade from [last_global_mask] to [changed_mask] with the value of : [value]. Real Masquerade Value with the other possible variables : [SSmasquerade.total_level]")
-	message_admins(msg)
-	SSblackbox.record_feedback("tally", "admin_verb", 1, "Global Adjust Masquerade")
-
-
-
-
-
-/client/proc/cmd_admin_adjust_masquerade(mob/living/carbon/human/M in GLOB.player_list)
-	set name = "Adjust Masquerade"
-	set category = "Admin"
-	if (!check_rights(R_ADMIN))
-		return
-
-	if(!ismob(M))
-		return
-	if(!check_rights(R_ADMIN))
-		return
-
-	var/value = input(usr, "Enter the Masquerade adjustment value for [key_name(M)]:", "Masquerade Adjustment", 0) as num|null
-	if(!value)
-		return
-	if(isgarou(M) || iswerewolf(M))
-		M.adjust_veil(value, forced = TRUE)
-	else
-		M.AdjustMasquerade(value, TRUE)
-	var/msg = "<span class='adminnotice'><b>Masquerade Adjustment: [key_name_admin(usr)] adjusted [key_name_admin(M)]'s masquerade by [value] to [M.masquerade]</b></span>"
-	log_admin("MasqAdjust: [key_name(usr)] has adjusted [key_name(M)]'s masquerade by [value] to [M.masquerade]")
-	message_admins(msg)
-	admin_ticket_log(M, msg)
-	SSblackbox.record_feedback("tally", "admin_verb", 1, "Adjust Masquerade")
-/*
-/client/proc/cmd_admin_adjust_humanity(mob/living/carbon/human/M in GLOB.player_list)
-	set name = "Adjust Humanity"
-	set category = "Admin"
-	if (!check_rights(R_ADMIN))
-		return
-
-	if(!ismob(M))
-		return
-	if(!check_rights(R_ADMIN))
-		return
-
-	var/is_enlightenment = FALSE
-	if (M.client?.prefs?.is_enlightened)
-		is_enlightenment = TRUE
-
-	var/value = input(usr, "Enter the [is_enlightenment ? "Enlightenment" : "Humanity"] adjustment value for [M.key]:", "Humanity Adjustment", 0) as num|null
-	if(value == null)
-		return
-
-	M.morality_path.adjust_humanity(value, M)
-
-	var/msg = "<span class='adminnotice'><b>Humanity Adjustment: [key_name_admin(usr)] adjusted [key_name(M)]'s [is_enlightenment ? "Enlightenment" : "Humanity"] by [is_enlightenment ? -value : value] to [M.morality_path.score]</b></span>"
-	log_admin("HumanityAdjust: [key_name_admin(usr)] has adjusted [key_name(M)]'s [is_enlightenment ? "Enlightenment" : "Humanity"] by [is_enlightenment ? -value : value] to [M.morality_path.score]")
-	message_admins(msg)
-	admin_ticket_log(M, msg)
-	SSblackbox.record_feedback("tally", "admin_verb", 1, "Adjust Humanity")
-*/
 /client/proc/reward_exp()
 	set name = "Reward Experience"
 	set category = "Admin"
@@ -610,6 +535,7 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 					log_admin("[key_name(usr)] gave [whitelistee] the [whitelist] whitelist. Reason: [approval_reason]")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Grant Whitelist") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
+// TFN ADDITION START
 /client/proc/grant_discipline()
 	set name = "Grant Discipline"
 	set category = "Admin"
@@ -625,9 +551,9 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 		if ((preferences.pref_species.id != "kindred") && (preferences.pref_species.id != "ghoul"))
 			to_chat(usr, "<span class='warning'>Your target is not a vampire or a ghoul.</span>")
 			return
-		var/giving_discipline = input("What Discipline do you want to give [player]?") as null|anything in (subtypesof(/datum/discipline) - preferences.discipline_types - /datum/discipline/bloodheal)
+		var/giving_discipline = input("What Discipline do you want to give [player]?") as null|anything in (subtypesof(/datum/discipline) - preferences.discipline_types - /datum/discipline/bloodheal - /datum/discipline/path)
 		if (giving_discipline)
-			var/giving_discipline_level = input("What rank of this Discipline do you want to give [player]?") as null|anything in list(0, 1, 2, 3, 4, 5)
+			var/giving_discipline_level = input("What rank of this Discipline do you want to give [player]?") as null|anything in list(0, 1, 2, 3, 4, 5, 6)
 			if (!isnull(giving_discipline_level))
 				if ((giving_discipline_level > 1) && (preferences.pref_species.id == "ghoul"))
 					to_chat(usr, "<span class='warning'>Giving Discipline at level 1 because ghouls cannot have Disciplines higher.</span>")
@@ -654,6 +580,78 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 						qdel(discipline)
 
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Grant Discipline") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+// TFN ADDITION END
+
+// TFN ADDITION - Paths
+/client/proc/grant_path()
+	set name = "Grant Path"
+	set category = "Admin"
+	if(!check_rights(R_ADMIN))
+		return
+
+	var/client/player = input("What player do you want to give a point in a Path to?") as null|anything in GLOB.clients
+	if(!player)
+		return
+
+	if(!player.prefs)
+		to_chat(usr, "<span class='warning'>Could not find preferences for [player].")
+		return
+
+	var/datum/preferences/preferences = player.prefs
+	if(preferences.pref_species.id != "kindred" && preferences.pref_species.id != "ghoul")
+		to_chat(usr, "<span class='warning'>Your target is not a vampire or a ghoul.</span>")
+		return
+
+	var/giving_path = input("What Path do you want to give [player]?") as null|anything in (subtypesof(/datum/discipline/path) - preferences.discipline_types)
+	if(!giving_path)
+		return
+
+	var/giving_path_level = input("What rank of this Path do you want to give [player]?") as null|anything in list(0, 1, 2, 3, 4, 5)
+	if(isnull(giving_path_level))
+		return
+
+	if(giving_path_level > 1 && preferences.pref_species.id == "ghoul")
+		to_chat(usr, "<span class='warning'>Giving Path at level 1 because ghouls cannot have Paths higher.</span>")
+		giving_path_level = 1
+
+	var/reason = input("Why are you giving [player] this Path?") as null|text
+	if(!reason)
+		return
+
+	// Grant path temporarily (runtime only, not saved to character)
+	var/datum/discipline/path/path = new giving_path(giving_path_level)
+
+	message_admins("[ADMIN_LOOKUPFLW(usr)] gave [ADMIN_LOOKUPFLW(player)] the Path [path.name] at rank [path.level] (temporary). Reason: [reason]")
+	log_admin("[key_name(usr)] gave [key_name(player)] the Path [path.name] at rank [path.level] (temporary). Reason: [reason]")
+	SSoverwatch.record_action(usr, "[key_name(usr)] gave [key_name(player)] the Path [path.name] at rank [path.level] (temporary). Reason: [reason]")
+
+	if(giving_path_level <= 0 || !player.mob)
+		qdel(path)
+		SSblackbox.record_feedback("tally", "admin_verb", 1, "Grant Path")
+		return
+
+	if(!ishuman(player.mob))
+		qdel(path)
+		SSblackbox.record_feedback("tally", "admin_verb", 1, "Grant Path")
+		return
+
+	var/mob/living/carbon/human/human = player.mob
+	var/datum/species/kindred/species = human.dna.species
+
+	if(!istype(species, /datum/species/kindred))
+		to_chat(usr, span_warning("Target is not a Kindred - path not granted."))
+		qdel(path)
+		SSblackbox.record_feedback("tally", "admin_verb", 1, "Grant Path")
+		return
+
+	// Add to runtime disciplines list only
+	species.disciplines += path
+	var/datum/action/discipline/path/path_action = new /datum/action/discipline/path(path)
+	path_action.Grant(human)
+	to_chat(human, span_notice("You feel ancient knowledge flow into your mind... (temporary)"))
+
+	SSblackbox.record_feedback("tally", "admin_verb", 1, "Grant Path")
+//TFN ADDITION - Paths
 
 /client/proc/remove_discipline()
 	set name = "Remove Discipline"
@@ -1105,3 +1103,11 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	set category = "Debug"
 
 	src.stat_panel.send_message("create_debug")
+
+#ifdef SENDMAPS_PROFILE
+/client/proc/display_sendmaps()
+	set name = "Send Maps Profile"
+	set category = "Debug"
+
+	src << link("?debug=profile&type=sendmaps&window=test")
+#endif

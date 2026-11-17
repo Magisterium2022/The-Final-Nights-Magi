@@ -81,9 +81,9 @@ SUBSYSTEM_DEF(beastmastering)
 	speed = 0.35
 	maxHealth = 55 //Killable in two swings from a proper melee.
 	health = 55
-	harm_intent_damage = 5
-	melee_damage_lower = 8
-	melee_damage_upper = 18
+	harm_intent_damage = 15
+	melee_damage_lower = 15
+	melee_damage_upper = 15
 	attack_verb_continuous = "bites"
 	attack_verb_simple = "bite"
 	attack_sound = 'code/modules/wod13/sounds/dog.ogg'
@@ -261,7 +261,7 @@ SUBSYSTEM_DEF(beastmastering)
 				B.follow = FALSE
 
 /datum/action/beastmaster_deaggro
-	name = "Loose Aggression"
+	name = "Drop Aggression"
 	desc = "Command to stop any aggressive moves."
 	button_icon_state = "deaggro"
 	check_flags = AB_CHECK_HANDS_BLOCKED|AB_CHECK_IMMOBILE|AB_CHECK_LYING|AB_CHECK_CONSCIOUS

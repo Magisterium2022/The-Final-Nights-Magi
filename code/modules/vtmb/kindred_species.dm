@@ -25,7 +25,7 @@
 	wings_icon = "Dragon"
 	mutant_bodyparts = list("tail_human" = "None", "ears" = "None", "wings" = "None")
 	mutantbrain = /obj/item/organ/brain/vampire
-	brutemod = 0.5	// or change to 0.8
+	brutemod = 1	//Base damage - see damage_resistance check for when brute damage gets reduced
 	heatmod = 1		//Sucking due to overheating	///THEY DON'T SUCK FROM FIRE ANYMORE
 	burnmod = 2
 	punchdamagelow = 10
@@ -36,6 +36,7 @@
 	var/list/datum/discipline/disciplines = list()
 	selectable = TRUE
 	COOLDOWN_DECLARE(torpor_timer)
+	keeps_languages_on_transform = TRUE
 
 /datum/action/vampireinfo
 	name = "About Me"
@@ -85,7 +86,7 @@
 				if(A.objectives)
 					dat += "[printobjectives(A.objectives)]<BR>"
 		var/masquerade_level = " followed the Masquerade Tradition perfectly."
-		switch(host.masquerade)
+		switch(host.masquerade_score)
 			if(4)
 				masquerade_level = " broke the Masquerade rule once."
 			if(3)
@@ -98,7 +99,6 @@
 				masquerade_level = "'m danger to the Masquerade and my own kind."
 		dat += "The Camarilla thinks I[masquerade_level]<BR>"
 		var/humanity = "I'm out of my mind."
-
 		if(!host.clan.is_enlightened)
 			switch(host.morality_path.score)
 				if(8 to 10)
@@ -136,13 +136,6 @@
 			var/clan_leader_number = isnull(clan_leader_contact.number) ? "unknown" : clan_leader_contact.number
 			dat += " My clan leader is [clan_leader_contact.name]. Their phone number is [clan_leader_number].<BR>"
 
-		dat += "<b>Physique</b>: [host.physique] + [host.additional_physique]<BR>"
-		dat += "<b>Dexterity</b>: [host.dexterity] + [host.additional_dexterity]<BR>"
-		dat += "<b>Social</b>: [host.social] + [host.additional_social]<BR>"
-		dat += "<b>Mentality</b>: [host.mentality] + [host.additional_mentality]<BR>"
-		dat += "<b>Cruelty</b>: [host.blood] + [host.additional_blood]<BR>"
-		dat += "<b>Lockpicking</b>: [host.lockpicking] + [host.additional_lockpicking]<BR>"
-		dat += "<b>Athletics</b>: [host.athletics] + [host.additional_athletics]<BR>"
 		if(host.hud_used)
 			dat += "<b>Known disciplines:</b><BR>"
 			for(var/datum/action/discipline/D in host.actions)
@@ -176,13 +169,8 @@
 		if(panic && (host.mind.assigned_role == "Prince" || host.mind.assigned_role == "Sheriff" || host.mind.assigned_role == "Seneschal"))
 			dat += "The pincode for the panic room keypad is<b>: [panic.pincode]</b><BR>"
 		var/obj/structure/vaultdoor/pincode/bank/bankdoor = find_door_pin(/obj/structure/vaultdoor/pincode/bank)
-		if(bankdoor && (host.mind.assigned_role == "Capo"))
-			dat += "The pincode for the bank vault is <b>: [bankdoor.pincode]</b><BR>"
-		if(bankdoor && (host.mind.assigned_role == "La Squadra"))
-			if(prob(50))
-				dat += "<b>The pincode for the bank vault is: [bankdoor.pincode]</b><BR>"
-			else
-				dat += "<b>Unfortunately you don't know the vault code.</b><BR>"
+		if(bankdoor && ((host.mind.assigned_role == "Capo") || (host.mind.assigned_role == "La Squadra") || (host.mind.assigned_role == "La Famiglia")))
+			dat += "<b>The pincode for the bank vault is: [bankdoor.pincode]</b><BR>"
 
 		if(LAZYLEN(host.knowscontacts) > 0)
 			dat += "<b>I know some other of my kind in this city. Need to check my phone, there definetely should be:</b><BR>"
@@ -194,9 +182,16 @@
 		host << browse(HTML_SKELETON(dat), "window=vampire;size=400x450;border=1;can_resize=1;can_minimize=0")
 		onclose(host, "vampire", src)
 
-/datum/species/kindred/on_species_gain(mob/living/carbon/human/C)
+/datum/species/kindred/on_species_gain(mob/living/carbon/human/C, datum/species/old_species)
 	. = ..()
 	C.update_body(0)
+
+	if((old_species.id == "kindred") || (old_species.id == "zulo")) //No need to duplicate stuff if they already have it.
+		var/datum/species/kindred/K = old_species
+		for (var/datum/discipline/discipline in K.disciplines)
+			disciplines += discipline
+		return TRUE
+
 	C.last_experience = world.time + 5 MINUTES
 
 	var/datum/action/vampireinfo/infor = new()
@@ -229,11 +224,18 @@
 	//vampires resist vampire bites better than mortals
 	RegisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_vampire_bitten))
 
+	//apply blunt damage resistance
+	RegisterSignal(C, COMSIG_MOB_APPLY_DAMAGE_MODIFIERS, PROC_REF(damage_resistance))
+
 	//putting this here for now not sure if elsewhere is better?
 	RegisterSignal(C, COMSIG_ADD_VITAE, PROC_REF(add_vitae_from_item))
 
+	GLOB.kindred_list += C
+
 /datum/species/kindred/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
 	. = ..()
+	if((new_species.id == "kindred") || (new_species.id == "zulo"))  //Only remove this if they're shifting to a non-vampire species.
+		return TRUE
 	UnregisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED)
 	UnregisterSignal(C, COMSIG_ADD_VITAE)
 	for(var/datum/action/vampireinfo/VI in C.actions)
@@ -241,6 +243,7 @@
 	for(var/datum/action/A in C.actions)
 		if(A?.vampiric)
 			A.Remove(C)
+	GLOB.kindred_list -= C
 
 /datum/action/blood_power
 	name = "Blood Power"
@@ -281,14 +284,13 @@
 			BD.dna.species.punchdamagehigh = BD.dna.species.punchdamagehigh+5
 			BD.physiology.armor.melee = BD.physiology.armor.melee+15
 			BD.physiology.armor.bullet = BD.physiology.armor.bullet+15
-			BD.dexterity = BD.dexterity+2
-			BD.athletics = BD.athletics+2
-			BD.lockpicking = BD.lockpicking+2
+			BD.st_add_stat_mod(STAT_DEXTERITY, BD.bloodquality, "blood_power")
+			BD.st_add_stat_mod(STAT_ATHLETICS, BD.bloodquality, "blood_power")
+			BD.st_add_stat_mod(STAT_LARCENY, BD.bloodquality, "blood_power")
 			if(!HAS_TRAIT(BD, TRAIT_IGNORESLOWDOWN))
 				ADD_TRAIT(BD, TRAIT_IGNORESLOWDOWN, SPECIES_TRAIT)
 			BD.update_blood_hud()
-			spawn(100+BD.discipline_time_plus+BD.bloodpower_time_plus)
-				end_bloodpower()
+			addtimer(CALLBACK(src, PROC_REF(end_bloodpower)), (1 SCENES + BD.discipline_time_plus + BD.bloodpower_time_plus))
 		else
 			SEND_SOUND(BD, sound('code/modules/wod13/sounds/need_blood.ogg', 0, 0, 75))
 			to_chat(BD, span_warning("You don't have enough <b>BLOOD</b> to become more powerful."))
@@ -303,9 +305,9 @@
 			BD.physiology.armor.bullet = BD.physiology.armor.bullet-15
 			if(HAS_TRAIT(BD, TRAIT_IGNORESLOWDOWN))
 				REMOVE_TRAIT(BD, TRAIT_IGNORESLOWDOWN, SPECIES_TRAIT)
-		BD.dexterity = BD.dexterity-2
-		BD.athletics = BD.athletics-2
-		BD.lockpicking = BD.lockpicking-2
+		BD.st_remove_stat_mod(STAT_DEXTERITY, "blood_power")
+		BD.st_remove_stat_mod(STAT_ATHLETICS, "blood_power")
+		BD.st_remove_stat_mod(STAT_LARCENY, "blood_power")
 
 /datum/action/give_vitae
 	name = "Give Vitae"
@@ -318,13 +320,13 @@
 	if(!iskindred(owner))
 		return
 	var/mob/living/carbon/human/vampire = owner
-	if(vampire.bloodpool < 2)
+	if(vampire.bloodpool < 1)
 		to_chat(owner, span_warning("You don't have enough <b>BLOOD</b> to do that!"))
 		return
 	if(isanimal(vampire.pulling))
 		var/mob/living/animal = vampire.pulling
 		animal.bloodpool = min(animal.maxbloodpool, animal.bloodpool+2)
-		vampire.bloodpool = max(0, vampire.bloodpool-2)
+		vampire.bloodpool = max(0, vampire.bloodpool-1)
 		animal.adjustBruteLoss(-25)
 		animal.adjustFireLoss(-25)
 		return
@@ -348,7 +350,7 @@
 	message_admins("[ADMIN_LOOKUPFLW(vampire)] has fed [ADMIN_LOOKUPFLW(grabbed_victim)] their blood!")
 	owner.visible_message(span_warning("[owner] feeds [grabbed_victim] with their own blood!"), span_notice("You successfully feed [grabbed_victim] with your own blood."))
 
-	vampire.bloodpool = max(0, vampire.bloodpool-2)
+	vampire.bloodpool = max(0, vampire.bloodpool-1)
 
 	var/mob/living/carbon/human/childe = grabbed_victim
 	var/mob/living/carbon/human/sire = vampire
@@ -360,8 +362,10 @@
 		var/datum/wound/W = pick(childe.all_wounds)
 		W.remove_wound()
 	childe.adjustFireLoss(-25, TRUE)
-	childe.bloodpool = min(childe.maxbloodpool, childe.bloodpool+2)
+	childe.bloodpool = min(childe.maxbloodpool, childe.bloodpool+(1 * sire.bloodquality))
+	childe.blood_volume = min(BLOOD_VOLUME_NORMAL, childe.blood_volume+50)
 	childe.drunked_of |= "[sire.dna.real_name]"
+	childe.mind?.ingested_blood = sire
 
 	// Sabbatist Embrace Logic
 	if(sire.mind && is_sabbatist(sire))
@@ -371,8 +375,19 @@
 			temp_antag.add_antag_hud(ANTAG_HUD_REV, "rev", childe)
 			qdel(temp_antag)
 			log_game("[key_name(sire)] has spread Sabbatism to [key_name(childe)] via vitae.")
+		if(isnpc(childe))
+			var/mob/living/carbon/human/npc/shovelhead = childe
+			var/list/shovel_messages = list(
+			"You force your blood down [shovelhead]'s throat and drive them to wassail.",
+			"Your blood seeps into [shovelhead]'s veins. As you force wassail to take hold, the Beast claims what remains.",
+			"You perform the Embrace and push [shovelhead] into wassail. They are yours... For now.",
+			"[shovelhead] dies and rises again as a shovelhead born from your blood.")
+			to_chat(sire, span_cult(pick(shovel_messages)))
+			shovelhead.make_shovelhead(sire.clan.type)
+			shovelhead.revive(full_heal = TRUE, admin_revive = TRUE)
+			log_game("[key_name(sire)] has created an NPC shovelhead via vitae.")
 
-	if(iskindred(childe)) //Cant do much to kindred other than try and  bond them.
+	if(iskindred(childe)) //Cant do much to kindred other than try and bond them.
 		var/datum/species/kindred/species = childe.dna.species
 		if(HAS_TRAIT(childe, TRAIT_TORPOR) && COOLDOWN_FINISHED(species, torpor_timer))
 			childe.untorpor()
@@ -388,7 +403,7 @@
 		ghoul.master = sire
 		return
 
-	if(isnpc(childe))
+	if(isnpc(childe) && !is_sabbatist(sire))
 		var/mob/living/carbon/human/npc/NPC = childe
 		NPC.npc_ghoulificate(sire)
 		return
@@ -474,13 +489,16 @@
 		action.Grant(src)
 	discipline.post_gain(src)
 
+/datum/species/proc/get_discipline()
+	return
+
 /**
  * Accesses a certain Discipline that a Kindred has. Returns false if they don't.
  *
  * Arguments:
  * * searched_discipline - Name or typepath of the Discipline being searched for.
  */
-/datum/species/kindred/proc/get_discipline(searched_discipline)
+/datum/species/kindred/get_discipline(searched_discipline)
 	for(var/datum/discipline/discipline in disciplines)
 		if (ispath(searched_discipline, /datum/discipline))
 			if (istype(discipline, searched_discipline))
@@ -564,7 +582,15 @@
 		return
 
 	var/possible_disciplines = teacher_prefs.discipline_types - student_prefs.discipline_types
-	var/teaching_discipline = input(teacher, "What Discipline do you want to teach [student.name]?", "Discipline Selection") as null|anything in possible_disciplines
+
+	// remove path and its subtypes
+	var/list/filtered_disciplines = list()
+	for (var/D in possible_disciplines)
+		if (!ispath(D, /datum/discipline/path))
+			filtered_disciplines += D
+
+
+	var/teaching_discipline = input(teacher, "What Discipline do you want to teach [student.name]?", "Discipline Selection") as null|anything in filtered_disciplines
 
 	if (teaching_discipline)
 		var/datum/discipline/teacher_discipline = teacher_species.get_discipline(teaching_discipline)
@@ -713,3 +739,10 @@
 		H.update_blood_hud()
 	if(plays_sound)
 		playsound(H.loc,'sound/items/drink.ogg', 50, TRUE)
+
+//Kindred take half "bashing" damage, which is normally blunt damage but also includes pointy things like bullets because they're undead
+/datum/species/kindred/proc/damage_resistance(datum/source, list/damage_mods, damage_amount, damagetype, def_zone, sharpness, attack_direction, obj/item/attacking_item)
+	SIGNAL_HANDLER
+
+	if((damagetype == BRUTE) && (sharpness != SHARP_EDGED))
+		damage_mods += 0.5

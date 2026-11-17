@@ -28,6 +28,8 @@
 	ADD_TRAIT(owner, TRAIT_THERMAL_VISION, TRAIT_GENERIC)
 	ADD_TRAIT(owner, TRAIT_NIGHT_VISION, TRAIT_GENERIC)
 
+	owner.st_add_stat_mod(STAT_PERCEPTION, discipline.level, "heightened_senses")
+
 	owner.update_sight()
 
 /datum/discipline_power/auspex/heightened_senses/deactivate()
@@ -35,6 +37,8 @@
 
 	REMOVE_TRAIT(owner, TRAIT_THERMAL_VISION, TRAIT_GENERIC)
 	REMOVE_TRAIT(owner, TRAIT_NIGHT_VISION, TRAIT_GENERIC)
+
+	owner.st_remove_stat_mod(STAT_PERCEPTION, "heightened_senses")
 
 	owner.update_sight()
 
@@ -51,10 +55,10 @@
 
 /datum/discipline_power/auspex/aura_perception/activate()
 	. = ..()
-	var/datum/atom_hud/abductor_hud = GLOB.huds[DATA_HUD_ABDUCTOR]
+	var/datum/atom_hud/abductor_hud = GLOB.huds[DATA_HUD_ABDUCTOR] // Yep, this uses the god damn Abductor HUD to apply the auras, as defined in auspex_auras.dm,
 	abductor_hud.add_hud_to(owner)
 
-	owner.see_invisible = OBFUSCATE_INVISIBILITY
+	owner.see_invisible = SEE_OBFUSCATE_INVISIBLITY
 
 	owner.update_sight()
 
@@ -215,7 +219,7 @@
 		SSblackbox.record_feedback("tally", "ic_blocked_words", 1, lowertext(config.ic_filter_regex.match))
 		return
 
-	log_directed_talk(owner, input_message, LOG_SAY, "[name]")
+	log_directed_talk(owner, target, input_message, LOG_SAY, "Telepathy")
 	to_chat(owner, span_notice("You project your thoughts into [target]'s mind: [input_message]"))
 	to_chat(target, span_boldannounce("You hear a voice in your head... [input_message]"))
 
@@ -225,9 +229,10 @@
 	name = "Psychic Projection"
 	desc = "Leave your body behind and fly across the land."
 
+	willpower_cost = 1
 	level = 5
 	check_flags = DISC_CHECK_CONSCIOUS
-	vitae_cost = 1
+	vitae_cost = 0
 
 /datum/discipline_power/auspex/psychic_projection/activate()
 	. = ..()

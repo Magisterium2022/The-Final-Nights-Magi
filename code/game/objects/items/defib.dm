@@ -254,8 +254,9 @@
 	update_power()
 
 /obj/item/defibrillator/compact/combat
-	name = "combat defibrillator"
-	desc = "A belt-equipped blood-red defibrillator. Can revive through thick clothing, has an experimental self-recharging battery, and can be utilized in combat via applying the paddles in a disarming or aggressive manner."
+	name = "combat defibrillator" ////TFN Change -- FIRST Response Team
+	desc = "A belt-equipped defibrillator developed by Magadon Incorporated. Can revive through thick clothing, has an experimental self-recharging battery, and can be utilized in combat via applying the paddles in a disarming or aggressive manner."
+	icon = 'modular_tfn/modules/first_team/icons/medical.dmi' //END TFN Change
 	icon_state = "defibcombat" //needs defib inhand sprites
 	inhand_icon_state = "defibcombat"
 	worn_icon_state = "defibcombat"
@@ -306,6 +307,7 @@
 	var/req_defib = TRUE
 	var/combat = FALSE //If it penetrates armor and gives additional functionality
 	var/wielded = FALSE // track wielded status on item
+	var/no_wielded_icon = FALSE //Does the Defib not have a specific wielded icon? TFN Edit, Tzimisce Rework Part 2
 
 /obj/item/shockpaddles/ComponentInitialize()
 	. = ..()
@@ -389,6 +391,8 @@
 	return (OXYLOSS)
 
 /obj/item/shockpaddles/update_icon_state()
+	if(no_wielded_icon == TRUE) //TFN Edit 
+		return FALSE //TFN Edit
 	icon_state = "[base_icon_state][wielded]"
 	inhand_icon_state = icon_state
 	if(cooldown)

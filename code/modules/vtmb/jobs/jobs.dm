@@ -109,9 +109,9 @@
 			to_chat(H, "<span class='userdanger'>The God has punished you for your sins!</span>", confidential = TRUE)
 
 /obj/item/card/id/prince
-	name = "leader badge"
-	id_type_name = "leader badge"
-	desc = "King in the castle!"
+	name = "chief executive officer badge"
+	id_type_name = "C.E.O. badge"
+	desc = "A badge denoting the wearer as the C.E.O. of the Transamerica Corporation."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "id6"
 	inhand_icon_state = "card-id"
@@ -122,8 +122,8 @@
 	worn_icon_state = "id6"
 
 /obj/item/card/id/sheriff
-	name = "head security badge"
-	id_type_name = "head security badge"
+	name = "head of security badge"
+	id_type_name = "head of security badge"
 	desc = "A badge which shows honour and dedication."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "id4"
@@ -135,8 +135,8 @@
 	worn_icon_state = "id4"
 
 /obj/item/card/id/camarilla
-	name = "security badge"
-	id_type_name = "security badge"
+	name = "corporate security badge"
+	id_type_name = "corporate security security badge"
 	desc = "A badge which shows honour and dedication."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "id3"
@@ -148,9 +148,9 @@
 	worn_icon_state = "id3"
 
 /obj/item/card/id/clerk
-	name = "clerk badge"
-	id_type_name = "clerk badge"
-	desc = "A badge which shows bureaucracy qualification."
+	name = "chief operating officer badge"
+	id_type_name = "chief operating officer"
+	desc = "A badge denoting the wearer as the C.O.O. of the Transamerica Corporation."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "id1"
 	inhand_icon_state = "card-id"
@@ -161,13 +161,13 @@
 	worn_icon_state = "id1"
 
 /obj/item/card/id/clerk/harpy
-	name = "Public Relations Clerk badge"
-	desc = "A badge which shows social qualifications."
+	name = "public relations manager badge"
+	desc = "A badge which denotes the wearer as a PR Manager of Transamerica."
 
 /obj/item/card/id/bruiser
-	name = "bruiser badge"
-	id_type_name = "bruiser badge"
-	desc = "A badge which shows grit."
+	name = "member badge"
+	id_type_name = "member's badge"
+	desc = "The badge of a club member. United in purpose, the fists strike out."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "bruiser_badge"
 	inhand_icon_state = "card-id"
@@ -179,9 +179,9 @@
 	registered_name_is_public = FALSE
 
 /obj/item/card/id/sweeper
-	name = "sweeper badge"
-	id_type_name = "sweeper badge"
-	desc = "A badge which shows perspective."
+	name = "member badge"
+	id_type_name = "member's badge"
+	desc = "The badge of a club member. Collecting what is left to the margins, into one neat pile."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "sweeper_badge"
 	inhand_icon_state = "card-id"
@@ -193,9 +193,9 @@
 	registered_name_is_public = FALSE
 
 /obj/item/card/id/emissary
-	name = "emissary badge"
-	id_type_name = "emissary badge"
-	desc = "A badge which shows a favored voice, interlaced with gold thread."
+	name = "gold interwoven badge"
+	id_type_name = "gold interwoven badge"
+	desc = "The gold-interlaced badge of a club member. The pride of a loudmouth, or silver tongued swindler."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "emissary_badge"
 	inhand_icon_state = "card-id"
@@ -204,6 +204,20 @@
 	onflooricon = 'code/modules/wod13/onfloor.dmi'
 	worn_icon = 'code/modules/wod13/worn.dmi'
 	worn_icon_state = "emissary_badge"
+	registered_name_is_public = FALSE
+
+/obj/item/card/id/liaison
+	name = "promoter badge"
+	id_type_name = "promoter badge"
+	desc = "The gold-interlaced badge of a club member. The ties that bind, and unity despite difference."
+	icon = 'code/modules/wod13/items.dmi'
+	icon_state = "liaison_badge"
+	inhand_icon_state = "card-id"
+	lefthand_file = 'icons/mob/inhands/equipment/idcards_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/equipment/idcards_righthand.dmi'
+	onflooricon = 'code/modules/wod13/onfloor.dmi'
+	worn_icon = 'code/modules/wod13/worn.dmi'
+	worn_icon_state = "liaison_badge"
 	registered_name_is_public = FALSE
 
 /obj/item/card/id/baron
@@ -237,6 +251,10 @@
 /obj/item/card/id/clinic/director
 	name = "clinic director's badge"
 	desc = "A badge which shows not only medical qualification, but also an authority over the clinic."
+
+/obj/item/card/id/clinic/mortattendant
+	name = "morgue badge"
+	desc = "A badge which shows the wearer is certified in forensic pathology or mortuary science, and is responsible for the morgue."
 
 /obj/item/card/id/archive
 	name = "scholar badge"
@@ -332,9 +350,9 @@
 	registered_name_is_public = FALSE
 
 /obj/item/card/id/primogen
-	name = "mysterious primogen badge"
-	id_type_name = "mysterious primogen badge"
-	desc = "Sponsored by the Shadow Government."
+	name = "board director badge"
+	id_type_name = "board director badge"
+	desc = "This badge denotes the wearer as a member of the Transamerica Corporation's Board of Directors."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "id12"
 	inhand_icon_state = "card-id"
@@ -348,7 +366,7 @@
 /obj/item/card/id/police
 	name = "police officer badge"
 	id_type_name = "police officer badge"
-	desc = "Sponsored by the Government."
+	desc = "A silver star made of smooth polished metal, indicating the wearer to be a police officer of the San Francisco Police Department."
 	icon = 'code/modules/wod13/items.dmi'
 	icon_state = "id13"
 	inhand_icon_state = "card-id"
@@ -371,21 +389,21 @@
 	worn_icon = 'code/modules/wod13/worn.dmi'
 	worn_icon_state = "id1"
 
-/obj/item/card/id/government/districtattorney
-	name = "SFPD DA Badge"
-	desc = "Sponsored by the Government. District Attorney. Watermarked with the seal of the Judiciary Committee."
+/obj/item/card/id/government/assistantdistrictattorney
+	name = "assistant district attorney badge"
+	desc = "A leather patrch marked with the seal of the District Attorney's Office."
 
 /obj/item/card/id/police/sergeant
 	name = "police sergeant badge"
-	desc = "Sponsored by the Government. This one seems slightly more worn down than all the others."
+	desc = "A silver star with intricate silver engravings, indicating the wearer to be a sergeant of the San Francisco Police Department."
 
-/obj/item/card/id/police/chief
-	name = "police chief badge"
-	desc = "Sponsored by the Government. This one has a chrome plated finish."
+/obj/item/card/id/police/captain
+	name = "police captain badge"
+	desc = "A gold star with intricate 10k gold-filled engravings, indicating the wearer to be a captain of the San Francisco Police Department."
 
 /obj/item/card/id/police/fbi
 	name = "fbi special agent badge"
-	desc = "Sponsored by the Government. This one has all the bells and whistles."
+	desc = "A rather ornate badge made of polished gold-like metal. It has the words \"Federal Bureau of Investigation\" engraved on it."
 
 /obj/item/card/id/bahari
 	name = "cultist badge"
@@ -485,6 +503,21 @@
 	onflooricon = 'code/modules/wod13/onfloor.dmi'
 	worn_icon = 'code/modules/wod13/worn.dmi'
 	worn_icon_state = "rubyBadge"
+
+// PRINCE ASSIGNMENT BADGES
+
+/obj/item/card/id/elysium
+	name = "Keeper of Elysium badge"
+	id_type_name = "elysium badge"
+	desc = "A badge which identifies you as the Keeper of Elysium."
+	icon = 'code/modules/wod13/items.dmi'
+	icon_state = "elysiumBadge"
+	inhand_icon_state = "card-id"
+	lefthand_file = 'icons/mob/inhands/equipment/idcards_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/equipment/idcards_righthand.dmi'
+	onflooricon = 'code/modules/wod13/onfloor.dmi'
+	worn_icon = 'code/modules/wod13/worn.dmi'
+	worn_icon_state = "elysiumBadge"
 
 // GAROU
 /obj/item/card/id/garou

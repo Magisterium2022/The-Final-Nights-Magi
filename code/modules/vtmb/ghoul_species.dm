@@ -65,7 +65,7 @@
 				if(A.objectives)
 					dat += "[printobjectives(A.objectives)]<BR>"
 		var/masquerade_level = " followed the Masquerade Tradition perfectly."
-		switch(host.masquerade)
+		switch(host.masquerade_score)
 			if(4)
 				masquerade_level = " broke the Masquerade rule once."
 			if(3)
@@ -77,13 +77,6 @@
 			if(0)
 				masquerade_level = "'m danger to the Masquerade and my own kind."
 		dat += "Camarilla thinks I[masquerade_level]<BR>"
-		dat += "<b>Physique</b>: [host.physique] + [host.additional_physique]<BR>"
-		dat += "<b>Dexterity</b>: [host.dexterity] + [host.additional_dexterity]<BR>"
-		dat += "<b>Social</b>: [host.social] + [host.additional_social]<BR>"
-		dat += "<b>Mentality</b>: [host.mentality] + [host.additional_mentality]<BR>"
-		dat += "<b>Cruelty</b>: [host.blood] + [host.additional_blood]<BR>"
-		dat += "<b>Lockpicking</b>: [host.lockpicking] + [host.additional_lockpicking]<BR>"
-		dat += "<b>Athletics</b>: [host.athletics] + [host.additional_athletics]<BR>"
 		if(host.Myself)
 			if(host.Myself.Friend)
 				if(host.Myself.Friend.owner)
@@ -134,15 +127,19 @@
 
 /datum/species/ghoul/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
 	. = ..()
+	for(var/datum/action/ghoulinfo/infor in C.actions)
+		if(infor)
+			infor.Remove(C)
+	if((new_species.id == "kindred") || (new_species.id == "ghoul") || (new_species.id == "zulo"))  //Only remove this if they're shifting to a non-vampire species.
+		for(var/datum/action/take_vitae/T in C.actions)
+			T.Remove(C)
+		return TRUE
 	for(var/datum/action/A in C.actions)
 		if(A)
 			if(A.vampiric)
 				A.Remove(C)
-	for(var/datum/action/ghoulinfo/infor in C.actions)
-		if(infor)
-			infor.Remove(C)
 
-/datum/action/take_vitae
+/datum/action/take_vitae //currently unused
 	name = "Take Vitae"
 	desc = "Take vitae from a Vampire by force."
 	button_icon_state = "ghoul"
@@ -229,7 +226,7 @@
 		H.adjustFireLoss(-2.5*level, TRUE)
 		H.adjustOxyLoss(-20*level, TRUE)
 		H.adjustToxLoss(-20*level, TRUE)
-		H.blood_volume = min(H.blood_volume + 56, 560)
+		H.blood_volume = min(H.blood_volume + 50, BLOOD_VOLUME_NORMAL)
 		button.color = "#970000"
 		animate(button, color = "#ffffff", time = 20, loop = 1)
 		if(length(H.all_wounds))
@@ -255,24 +252,13 @@
 /datum/species/ghoul/spec_life(mob/living/carbon/human/H)
 	. = ..()
 	if(HAS_TRAIT(H, TRAIT_UNMASQUERADE))
-		if(H.CheckEyewitness(H, H, 7, FALSE))
-			H.AdjustMasquerade(-1)
-	if(H.key && H.stat != DEAD)
-		var/datum/preferences/P = GLOB.preferences_datums[ckey(H.key)]
-		if(P)
-			if(P.masquerade != H.masquerade)
-				P.masquerade = H.masquerade
-				P.save_preferences()
-				P.save_character()
+		SEND_SIGNAL(H, COMSIG_MASQUERADE_VIOLATION)
 
 /datum/species/human/spec_life(mob/living/carbon/human/H)
 	. = ..()
-	if(HAS_TRAIT(H, TRAIT_UNMASQUERADE))
-		if(H.CheckEyewitness(H, H, 7, FALSE))
-			H.AdjustMasquerade(-1)
 
-	if((H.last_bloodpool_restore + 60 SECONDS) <= world.time)
-		H.last_bloodpool_restore = world.time
+	if(COOLDOWN_FINISHED(H, bloodpool_restore))
+		COOLDOWN_START(H, bloodpool_restore, 1 MINUTES)
 		H.bloodpool = min(H.maxbloodpool, H.bloodpool+1)
 
 
@@ -283,7 +269,7 @@
  * Arguments:
  * * searched_discipline - Name or typepath of the Discipline being searched for.
  */
-/datum/species/ghoul/proc/get_discipline(searched_discipline)
+/datum/species/ghoul/get_discipline(searched_discipline)
 	for(var/datum/discipline/discipline in disciplines)
 		if (ispath(searched_discipline, /datum/discipline))
 			if (istype(discipline, searched_discipline))

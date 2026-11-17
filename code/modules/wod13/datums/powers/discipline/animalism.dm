@@ -24,7 +24,7 @@
 
 /datum/discipline_power/animalism/summon_rat/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -36,10 +36,14 @@
 		var/datum/action/beastmaster_deaggro/deaggro = new()
 		deaggro.Grant(owner)
 
-	var/mob/living/simple_animal/hostile/beastmaster/rat/rat = new(get_turf(owner))
-	rat.my_creator = owner
-	owner.beastmaster |= rat
-	rat.beastmaster_owner = owner
+	var/summon_option = /mob/living/simple_animal/hostile/beastmaster/rat
+	if(HAS_TRAIT(owner, TRAIT_UNLIVING_HIVE))
+		summon_option = /mob/living/simple_animal/hostile/beastmaster/cockroach
+	var/mob/living/simple_animal/hostile/beastmaster/summon = new summon_option(get_turf(owner))
+	summon.my_creator = owner
+	owner.beastmaster |= summon
+	summon.beastmaster_owner = owner
+
 
 //SUMMON CAT
 /datum/discipline_power/animalism/summon_cat
@@ -55,7 +59,7 @@
 
 /datum/discipline_power/animalism/summon_cat/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -67,10 +71,15 @@
 		var/datum/action/beastmaster_deaggro/deaggro = new()
 		deaggro.Grant(owner)
 
-	var/mob/living/simple_animal/hostile/beastmaster/cat/cat = new(get_turf(owner))
-	cat.my_creator = owner
-	owner.beastmaster |= cat
-	cat.beastmaster_owner = owner
+
+	var/summon_option = /mob/living/simple_animal/hostile/beastmaster/cat
+	if(HAS_TRAIT(owner, TRAIT_UNLIVING_HIVE))
+		summon_option = /mob/living/simple_animal/hostile/beastmaster/cockroach/spider
+	var/mob/living/simple_animal/hostile/beastmaster/summon = new summon_option(get_turf(owner))
+	summon.my_creator = owner
+	owner.beastmaster |= summon
+	summon.beastmaster_owner = owner
+
 
 //SUMMON WOLF
 /*
@@ -96,7 +105,7 @@
 
 /datum/discipline_power/animalism/summon_wolf/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -108,10 +117,13 @@
 		var/datum/action/beastmaster_deaggro/deaggro = new()
 		deaggro.Grant(owner)
 
-	var/mob/living/simple_animal/hostile/beastmaster/dog = new(get_turf(owner))
-	dog.my_creator = owner
-	owner.beastmaster |= dog
-	dog.beastmaster_owner = owner
+	var/summon_option = /mob/living/simple_animal/hostile/beastmaster
+	if(HAS_TRAIT(owner, TRAIT_UNLIVING_HIVE))
+		summon_option = /mob/living/simple_animal/hostile/beastmaster/largespider
+	var/mob/living/simple_animal/hostile/beastmaster/summon = new summon_option(get_turf(owner))
+	summon.my_creator = owner
+	owner.beastmaster |= summon
+	summon.beastmaster_owner = owner
 
 //SUMMON BAT
 /datum/discipline_power/animalism/summon_bat
@@ -127,7 +139,7 @@
 
 /datum/discipline_power/animalism/summon_bat/activate()
 	. = ..()
-	var/limit = min(2, level) + owner.social + owner.additional_social + owner.more_companions - 1
+	var/limit = min(2, level) + owner.st_get_stat(STAT_LEADERSHIP)
 	if(HAS_TRAIT(owner, TRAIT_ANIMAL_REPULSION))
 		limit = max(1,limit-2)
 	if(length(owner.beastmaster) >= limit)
@@ -144,7 +156,7 @@
 	owner.beastmaster |= bat
 	bat.beastmaster_owner = owner
 
-//RAT SHAPESHIFT
+//'FLYING' RAT (BAT) SHAPESHIFT
 /obj/effect/proc_holder/spell/targeted/shapeshift/animalism
 	name = "Animalism Form"
 	desc = "Take on the shape a bat."
@@ -154,18 +166,29 @@
 	die_with_shapeshifted_form = FALSE
 	shapeshift_type = /mob/living/simple_animal/hostile/beastmaster/rat/flying
 
+//SKITTER - Bat Shapeshift
 /datum/discipline_power/animalism/rat_shapeshift
 	name = "Skitter"
 	desc = "Become one of the bats that fly above the city."
-
+	level = 5
 	check_flags = DISC_CHECK_IMMOBILE | DISC_CHECK_CAPABLE | DISC_CHECK_LYING
 
 	violates_masquerade = TRUE
-
 	cooldown_length = 8 SECONDS
-	duration_length = 20 SECONDS
 
 	var/obj/effect/proc_holder/spell/targeted/shapeshift/animalism/shapeshift
+
+/datum/discipline_power/animalism/rat_shapeshift/pre_activation_checks()
+	. = ..()
+	if(HAS_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING))
+		to_chat(owner, span_warning("YOU ALREADY ARE TRANSFORMING!"))
+		return FALSE
+	else
+		ADD_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+	to_chat(owner, span_warning("You begin transforming..."))
+	if (do_after(owner, 6 SECONDS, timed_action_flags = (IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM )))
+		REMOVE_TRAIT(owner, TRAIT_CURRENTLY_TRANSFORMING, DISCIPLINE_TRAIT)
+		return TRUE
 
 /datum/discipline_power/animalism/rat_shapeshift/activate()
 	. = ..()
@@ -173,8 +196,26 @@
 		shapeshift = new(owner)
 	shapeshift.Shapeshift(owner)
 
-/datum/discipline_power/animalism/rat_shapeshift/deactivate()
+//SONG IN THE DARK
+/datum/discipline_power/animalism/song_in_the_dark
+	name = "Song in the Dark"
+	desc = "Summon huge worms from the deep earth to shift the earth, creating caverns or earthquakes."
+
+	level = 6
+	violates_masquerade = TRUE
+
+	cooldown_length = 30 SECONDS
+
+/datum/discipline_power/animalism/song_in_the_dark/activate()
 	. = ..()
-	if(owner.stat != DEAD)
-		shapeshift.Restore(shapeshift.myshape)
-		owner.Stun(1.5 SECONDS)
+	for(var/mob/living/L in range(7, owner))
+		if(L != owner)
+			to_chat(L, span_danger("The ground quakes beneath your feet!"))
+			L.Paralyze(100)
+			L.adjustBruteLoss(150)
+			var/obj/structure/flora/rock/giant_rock = new(get_turf(L))
+			QDEL_IN(giant_rock, 200)
+
+/datum/discipline_power/animalism/song_in_the_dark/post_gain()
+	. = ..()
+	ADD_TRAIT(owner, TRAIT_ANIMAL_SUCCULENCE, MAGIC_TRAIT)

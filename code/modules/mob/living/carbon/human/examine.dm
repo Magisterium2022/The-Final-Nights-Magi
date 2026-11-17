@@ -335,7 +335,8 @@
 		if(DISGUST_LEVEL_DISGUSTED to INFINITY)
 			msg += "[t_He] look[p_s()] extremely disgusted.\n"
 
-	var/apparent_blood_volume = bloodpool
+
+/* TFN EDIT START -- Blood Sucking Rework
 	if(skin_tone == "albino")
 		apparent_blood_volume -= 3
 	if(HAS_TRAIT(user, TRAIT_COLD_AURA))
@@ -350,6 +351,27 @@
 		msg += "[t_He] look[p_s()] like pale death.\n"
 	else if(bloodpool <= 0)
 		msg += "<span class='deadsay'><b>[t_He] resemble[p_s()] a crushed, empty juice pouch.</b></span>\n"
+TFN EDIT END - Blood Sucking Rework */
+
+
+//TFN EDIT START -- Blood Sucking Rework
+	var/visible_blood_volume = blood_volume
+	if(skin_tone == "albino")
+		visible_blood_volume -= 100
+	if(HAS_TRAIT(user, TRAIT_COLD_AURA))
+		visible_blood_volume -= 50
+	if(HAS_TRAIT(user, TRAIT_BLUSH_OF_HEALTH))
+		visible_blood_volume += 500
+	switch(visible_blood_volume)
+		if(BLOOD_VOLUME_OKAY to BLOOD_VOLUME_SAFE)
+			msg += "[t_He] look[p_s()] a little anemic."
+		if(BLOOD_VOLUME_BAD to BLOOD_VOLUME_OKAY)
+			msg += "[t_He] look[p_s()] anemic."
+		if(BLOOD_VOLUME_SURVIVE to BLOOD_VOLUME_BAD)
+			msg += . += "[t_He] look[p_s()] incredibly anemic."
+		if(-INFINITY to BLOOD_VOLUME_SURVIVE)
+			msg += "[t_He] [t_is] deathly pale."
+//TFN EDIT END - Blood Sucking Rework
 
 	if(is_bleeding())
 		var/list/obj/item/bodypart/bleeding_limbs = list()
@@ -457,6 +479,8 @@
 					msg += "[t_He] [t_has] a stupid expression on [t_his] face.\n"
 
 		//examine text for unusual appearances
+		//TFN ADDITION START - https://github.com/The-Final-Nights/The-Final-Nights/pull/759
+		// Just including this whole block since its been here this entire time.
 		if (iskindred(src) && is_face_visible())
 			switch (GET_BODY_SPRITE(src))
 				if (CLAN_NOSFERATU)
@@ -476,6 +500,9 @@
 					msg += span_boldwarning("[p_they(TRUE)] [p_are()] a skeletonised corpse!</b><br>")
 			if (HAS_TRAIT(src, TRAIT_PERMAFANGS))
 				msg += span_warning("[p_they(TRUE)] [p_have()] visible fangs in [p_their()] mouth.</span><br>")
+			if (HAS_TRAIT(src, TRAIT_UNLIVING_HIVE))
+				msg += span_warning("[p_their(TRUE)] skin seems to be infested with insects!<br>")
+		//TFN ADDITION END - https://github.com/The-Final-Nights/The-Final-Nights/pull/759
 
 		if (iszombie(src) && is_face_visible())
 			msg += span_danger("<b>[p_they(TRUE)] [p_are()] a decayed corpse!</b><br>")
@@ -506,7 +533,7 @@
 
 			if(ishuman(user))
 				var/mob/living/carbon/human/garou = user
-				if((garou.mentality+garou.additional_mentality) > (src.social+src.additional_social))
+				if((garou.st_get_stat(STAT_INVESTIGATION)) > (src.st_get_stat(STAT_SUBTERFUGE)))
 					splat_sense = 1
 
 			if(iscathayan(src))
@@ -548,9 +575,9 @@
 					wyrm_taint++
 					wyld_taint--
 					weaver_taint--
-				if(istype(wolf,/mob/living/simple_animal/werewolf))
-					var/mob/living/simple_animal/werewolf/werewolf = src
-					if(werewolf.wyrm_tainted)
+				if(istype(wolf,/mob/living/carbon/werewolf))
+					var/mob/living/carbon/werewolf/werewolf = src
+					if(HAS_TRAIT(werewolf, TRAIT_WYRMTAINTED))
 						wyrm_taint++
 						wyld_taint--
 						weaver_taint--
@@ -578,6 +605,10 @@
 
 				if (!wyrm_taint && !weaver_taint && !wyld_taint)
 					msg += "<span class='purple'><i>You aren't sensing any of the triat's influence on [p_them()]...</i></span>\n"
+				//TFN EDIT START - Kinfolk Merit
+				if(HAS_TRAIT(src, TRAIT_KINFOLK))
+					msg += "<span class='purple'><i>[p_they(TRUE)] smell[p_s()] of being Kin, in some way."
+				//TFN EDIT END - Kinfolk Merit
 		else
 			msg += "<span class='purple'><i>[p_they(TRUE)] [p_are()] too far away to get a good sniff...</i></span>\n"
 
@@ -607,8 +638,10 @@
 	if(custom_examine_message)
 		. += span_purple(custom_examine_message)
 
-	if(ishuman(user))
-		. += "<a href='byond://?src=[REF(src)];masquerade=1'>Spot a Masquerade violation</a>"
+	if(ishumanbasic(user))
+		. += "<a href='byond://?src=[REF(src)];masquerade=1'>Report a Masquerade violation</a>"
+		. += "---------------"
+		. += "<a href='byond://?src=[REF(src)];reinforcement=1'>Report a Masquerade reinforcement</a>"
 
 	. += flavor_text_creation()
 
@@ -656,7 +689,7 @@
 			. += span_info("<b>Traits:</b> [get_quirk_string(FALSE, CAT_QUIRK_ALL)]")
 	. += "</span>"
 
-	SEND_SIGNAL(src, COMSIG_PARENT_EXAMINE, user, .)
+	SEND_SIGNAL(src, COMSIG_ATOM_EXAMINE, user, .)
 
 /mob/living/proc/status_effect_examines(pronoun_replacement) //You can include this in any mob's examine() to show the examine texts of status effects!
 	var/list/dat = list()

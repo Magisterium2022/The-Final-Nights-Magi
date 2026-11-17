@@ -55,11 +55,11 @@
 	use_skintones = TRUE
 	limbs_id = "human"
 	wings_icon = "None"
-	brutemod = 0.5
+	brutemod = 1	//Same as kindred - see unique damage_resistence check
 	heatmod = 1
 	burnmod = 3
 	dust_anim = "dust-k"
-	whitelisted = FALSE
+	whitelisted = TRUE
 	selectable = TRUE
 	var/turf/fool_turf
 	var/fool_fails = 0
@@ -169,19 +169,19 @@
 			for(var/datum/antagonist/A in host.mind.antag_datums)
 				if(A.objectives)
 					dat += "[printobjectives(A.objectives)]<BR>"
-		var/masquerade_level = " is clueless about my presence."
-		switch(host.masquerade)
+		var/masquerade_level = "is ignorant to my true nature."
+		switch(host.masquerade_score)
 			if(4)
-				masquerade_level = " has some thoughts of awareness."
+				masquerade_level = "is starting to notice."
 			if(3)
-				masquerade_level = " is barely spotting the truth."
+				masquerade_level = "is almost uncovering the truth."
 			if(2)
-				masquerade_level = " is starting to know."
+				masquerade_level = "almost certainly knows."
 			if(1)
-				masquerade_level = " knows me and my true nature."
+				masquerade_level = "knows me and my true nature."
 			if(0)
-				masquerade_level = " thinks I'm a monster and is hunting me."
-		dat += "West[masquerade_level]<BR>"
+				masquerade_level = "thinks I'm a monster and is hunting me down."
+		dat += "The Mundane World [masquerade_level]<BR>"
 		var/dharma = "I'm mindless carrion-eater!"
 		switch(host.mind.dharma?.level)
 			if(1)
@@ -200,13 +200,6 @@
 		dat += "<b>Yin/Yang</b>[host.max_yin_chi]/[host.max_yang_chi]<BR>"
 		dat += "<b>Hun/P'o</b>[host.mind.dharma?.Hun]/[host.max_demon_chi]<BR>"
 
-		dat += "<b>Physique</b>: [host.physique] + [host.additional_physique]<BR>"
-		dat += "<b>Dexterity</b>: [host.dexterity] + [host.additional_dexterity]<BR>"
-		dat += "<b>Social</b>: [host.social] + [host.additional_social]<BR>"
-		dat += "<b>Mentality</b>: [host.mentality] + [host.additional_mentality]<BR>"
-		dat += "<b>Cruelty</b>: [host.blood] + [host.additional_blood]<BR>"
-		dat += "<b>Lockpicking</b>: [host.lockpicking] + [host.additional_lockpicking]<BR>"
-		dat += "<b>Athletics</b>: [host.athletics] + [host.additional_athletics]<BR>"
 		if(host.Myself)
 			if(host.Myself.Friend)
 				if(host.Myself.Friend.owner)
@@ -252,6 +245,9 @@
 
 	//Kuei-jin resist vampire bites better than mortals
 	RegisterSignal(C, COMSIG_MOB_VAMPIRE_SUCKED, PROC_REF(on_kuei_jin_bitten))
+
+	//apply blunt damage resistance
+	RegisterSignal(C, COMSIG_MOB_APPLY_DAMAGE_MODIFIERS, PROC_REF(damage_resistance))
 
 /datum/species/kuei_jin/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
 	. = ..()
@@ -304,10 +300,6 @@
 				P.save_character()
 			if(P.yang != H.max_yang_chi)
 				P.yang = H.max_yang_chi
-				P.save_preferences()
-				P.save_character()
-			if(P.masquerade != H.masquerade)
-				P.masquerade = H.masquerade
 				P.save_preferences()
 				P.save_character()
 
@@ -366,8 +358,8 @@
 					H.mind.dharma.roll_po(trigger, H)
 					COOLDOWN_START(H.mind.dharma, po_call, 5 SECONDS)
 	H.nutrition = NUTRITION_LEVEL_START_MAX
-	if((H.last_bloodpool_restore + 60 SECONDS) <= world.time)
-		H.last_bloodpool_restore = world.time
+	if(COOLDOWN_FINISHED(H, bloodpool_restore))
+		COOLDOWN_START(H, bloodpool_restore, 1 MINUTES)
 		H.bloodpool = min(H.maxbloodpool, H.bloodpool+1)
 
 /datum/action/breathe_chi
@@ -414,7 +406,7 @@
 	//this one is on carbon instead of living which means it needs some annoying extra code
 	var/has_gnosis = FALSE
 	if (iscarbon(victim))
-		var/mob/living/simple_animal/werewolf_victim = victim
+		var/mob/living/carbon/werewolf_victim = victim
 		if (werewolf_victim.auspice?.gnosis > 0)
 			has_gnosis = TRUE
 
@@ -648,3 +640,10 @@
 
 	if(iscathayan(being_bitten))
 		return COMPONENT_RESIST_VAMPIRE_KISS
+
+//Kuei-Jin take half "bashing" damage, which is normally blunt damage but also includes pointy things like bullets because they're undead
+/datum/species/kuei_jin/proc/damage_resistance(datum/source, list/damage_mods, damage_amount, damagetype, def_zone, sharpness, attack_direction, obj/item/attacking_item)
+	SIGNAL_HANDLER
+
+	if((damagetype == BRUTE) && (sharpness != SHARP_EDGED))
+		damage_mods += 0.5

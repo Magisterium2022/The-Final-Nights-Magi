@@ -12,7 +12,7 @@ GLOBAL_VAR_INIT(observer_default_invisibility, INVISIBILITY_OBSERVER)
 	stat = DEAD
 	alpha = 128
 	density = FALSE
-	see_invisible = SEE_INVISIBLE_OBSERVER
+	see_invisible = OBSERVER_SIGHT //TFN EDIT, ORIGINAL: see_invisible = SEE_INVISIBLE_OBSERVER
 	see_in_dark = 100
 	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE
 	invisibility = INVISIBILITY_OBSERVER
@@ -43,6 +43,7 @@ GLOBAL_VAR_INIT(observer_default_invisibility, INVISIBILITY_OBSERVER)
 	var/gas_scan = FALSE //Are gas scans currently enabled?
 	var/list/datahuds = list(DATA_HUD_SECURITY_ADVANCED, DATA_HUD_MEDICAL_ADVANCED, DATA_HUD_DIAGNOSTIC_ADVANCED) //list of data HUDs shown to ghosts.
 	var/ghost_orbit = GHOST_ORBIT_CIRCLE
+	var/soul_taken = FALSE // TFN ADDITION - Paths - Prevents necromancers from farming research off the same ghost
 
 	//These variables store hair data if the ghost originates from a species with head and/or facial hair.
 	var/hairstyle
@@ -558,7 +559,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	if (!ghostvision)
 		see_invisible = SEE_INVISIBLE_LIVING
 	else
-		see_invisible = SEE_INVISIBLE_OBSERVER
+		see_invisible = OBSERVER_SIGHT //TFN EDIT, ORIGINAL: see_invisible = SEE_INVISIBLE_OBSERVER
 
 
 	updateghostimages()

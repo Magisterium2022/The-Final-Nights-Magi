@@ -38,7 +38,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	///Whether emotes will be displayed on runechat. Requires chat_on_map to have effect. Boolean.
 	var/see_rc_emotes = TRUE
 	//Клан вампиров
-	var/datum/vampire_clan/clan
+	var/datum/vampire_clan/clan = new /datum/vampire_clan/brujah()
 	var/datum/morality/morality_path = new /datum/morality/humanity()
 	// Custom Keybindings
 	var/list/key_bindings = list()
@@ -161,9 +161,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	var/glory = 0
 	var/wisdom = 0
 
-	//Masquerade
-	var/masquerade = 5
-
+	//Masquerade, renamed to clear past masquereade scores
+	var/masquerade_score = 5
 	var/path_score = 7
 	var/is_enlightened = FALSE
 
@@ -194,16 +193,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	///Ranks of the Disciplines this character knows, corresponding to discipline_types.
 	var/list/discipline_levels = list()
 
-	var/physique = 1
-	var/dexterity = 1
-	var/social = 1
-	var/mentality = 1
-	var/blood = 1
-
-	//Skills
-	var/lockpicking = 0
-	var/athletics = 0
-
 	var/info_known = INFO_KNOWN_UNKNOWN
 
 	var/friend = FALSE
@@ -224,9 +213,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 	var/reason_of_death = "None"
 
-	var/archetype = /datum/archetype/average
-
-	var/breed = "Homid"
+	var/breed = BREED_HOMID
 	var/datum/garou_tribe/tribe = new /datum/garou_tribe/galestalkers()
 	var/datum/auspice/auspice = new /datum/auspice/ahroun()
 	var/werewolf_color = "black"
@@ -240,7 +227,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	var/auspice_level = 1
 
 	var/clan_accessory
-
+	var/digitigrade_legs = FALSE
 	var/dharma_type = /datum/dharma
 	var/dharma_level = 1
 	var/po_type = "Rebel"
@@ -264,15 +251,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	diablerist = 0
 	torpor_count = 0
 	generation_bonus = 0
-	physique = 1
-	dexterity = 1
-	mentality = 1
-	social = 1
-	blood = 1
-	lockpicking = 0
-	athletics = 0
 	info_known = INFO_KNOWN_UNKNOWN
-	masquerade = initial(masquerade)
+	masquerade_score = initial(masquerade_score)
 	generation = initial(generation)
 	dharma_level = initial(dharma_level)
 	hun = initial(hun)
@@ -287,15 +267,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	honor = initial(honor)
 	glory = initial(glory)
 	wisdom = initial(wisdom)
-	archetype = pick(subtypesof(/datum/archetype))
-	var/datum/archetype/A = new archetype()
-	physique = A.start_physique
-	dexterity = A.start_dexterity
-	social = A.start_social
-	mentality = A.start_mentality
-	blood = A.start_blood
-	lockpicking = A.start_lockpicking
-	athletics = A.start_athletics
 	clan = GLOB.vampire_clans[/datum/vampire_clan/brujah]
 	qdel(morality_path)
 	morality_path = new /datum/morality/humanity()
@@ -313,6 +284,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	real_name = random_unique_name(gender)
 	equipped_gear = list() // TFN ADDITION
 	headshot_link = null // TFN ADDITION
+	storyteller_stat_holder = null
+	storyteller_stat_holder = new()
 	save_character()
 
 /datum/preferences/New(client/C)
@@ -347,7 +320,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 #define APPEARANCE_CATEGORY_COLUMN "<td valign='top' width='14%'>"
 #define MAX_MUTANT_ROWS 4
-#define ATTRIBUTE_BASE_LIMIT 5 //Highest level that a base attribute can be upgraded to. Bonus attributes can increase the actual amount past the limit.
+#define ATTRIBUTE_BASE_LIMIT clamp(13 - generation, 5, 10) //Highest level that a base attribute can be upgraded to. Bonus attributes can increase the actual amount past the limit. //TFN EDIT - Original was 5.
 
 /proc/make_font_cool(text)
 	if(text)
@@ -437,10 +410,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 	if(istype(user, /mob/dead/new_player))
 		dat += "<a href='byond://?_src_=prefs;preference=tab;tab=0' [current_tab == 0 ? "class='linkOn'" : ""]>[make_font_cool("CHARACTER SETTINGS")]</a>"
-	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=1' [current_tab == 1 ? "class='linkOn'" : ""]>[make_font_cool("GAME PREFERENCES")]</a>"
+		dat += "<a href='byond://?_src_=prefs;preference=tab;tab=1' [current_tab == 1 ? "class='linkOn'" : ""]>[make_font_cool("ATTRIBUTES")]</a>" //TFN ADDITION - attributes
 	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=2' [current_tab == 2 ? "class='linkOn'" : ""]>[make_font_cool("LOADOUT")]</a>" // TFN ADDITION - loadout
-	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=3' [current_tab == 3 ? "class='linkOn'" : ""]>[make_font_cool("OOC PREFERENCES")]</a>"
-	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=4' [current_tab == 4 ? "class='linkOn'" : ""]>[make_font_cool("CUSTOM KEYBINDINGS")]</a>"
+	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=3' [current_tab == 3 ? "class='linkOn'" : ""]>[make_font_cool("GAME PREFERENCES")]</a>"
+	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=4' [current_tab == 4 ? "class='linkOn'" : ""]>[make_font_cool("OOC PREFERENCES")]</a>"
+	dat += "<a href='byond://?_src_=prefs;preference=tab;tab=5' [current_tab == 5 ? "class='linkOn'" : ""]>[make_font_cool("CUSTOM KEYBINDINGS")]</a>"
 
 	if(!path)
 		dat += "<div class='notice'>Please create an account to save your preferences</div>"
@@ -523,7 +497,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			dat += "<b>Species:</b><BR><a href='byond://?_src_=prefs;preference=species;task=input'>[pref_species.name]</a><BR>"
 			switch(pref_species.name)
 				if("Vampire")
-					dat += "<b>Masquerade:</b> [masquerade]/5<BR>"
+					dat += "<b>Masquerade:</b> [masquerade_score]/5<BR>"
 					dat += "<b>Generation:</b> [generation]"
 					var/generation_allowed = TRUE
 					if(clan?.name == CLAN_NONE)
@@ -553,7 +527,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						var/dharma_cost = min((dharma_level * 5), 20)
 						dat += " <a href='byond://?_src_=prefs;preference=dharmarise;task=input'>Raise Dharmic Enlightenment ([dharma_cost])</a><BR>"
 					dat += "<b>P'o Personality</b>: [po_type] <a href='byond://?_src_=prefs;preference=potype;task=input'>Switch</a><BR>"
-					dat += "<b>Awareness:</b> [masquerade]/5<BR>"
+					dat += "<b>Awareness:</b> [masquerade_score]/5<BR>"
 					dat += "<b>Yin/Yang</b>: [yin]/[yang] <a href='byond://?_src_=prefs;preference=chibalance;task=input'>Adjust</a><BR>"
 					dat += "<b>Hun/P'o</b>: [hun]/[po] <a href='byond://?_src_=prefs;preference=demonbalance;task=input'>Adjust</a><BR>"
 				if("Werewolf")
@@ -570,7 +544,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					var/gloryXP = 25
 					var/honorXP = 25
 					var/wisdomXP = 25
-					dat += "<b>Veil:</b> [masquerade]/5<BR>"
+					dat += "<b>Veil:</b> [masquerade_score]/5<BR>"
 					switch(tribe.name)
 						if("Ronin")
 							dat += "Renown matters little to you, now."
@@ -613,37 +587,14 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						dat += "<a href='byond://?_src_=prefs;preference=renownrank;task=input'>Raise Renown Rank</a><BR>"
 					if(can_raise_gnosis && player_experience >= 50)
 						dat += "<a href='byond://?_src_=prefs;preference=extra_gnosis;task=input'>Raise Extra Gnosis ([extra_gnosis]/5) Cost: 50 EXP </a><BR>"
-					else if(renownrank < MAX_PUBLIC_RANK)
-						var/renownrequirement = RenownRequirements()
+					var/renownrequirement = RenownRequirements()
+					if(renownrank < MAX_PUBLIC_RANK || (SSwhitelists.is_whitelisted(user.ckey, TRUSTED_PLAYER) && (renownrank < MAX_TRUSTED_RANK)))
 						dat += "<b>Needed To Raise Renown:</b> [renownrequirement]<BR>"
 					else
 						dat += "<BR>"
 				if("Ghoul")
-					dat += "<b>Masquerade:</b> [masquerade]/5<BR>"
+					dat += "<b>Masquerade:</b> [masquerade_score]/5<BR>"
 
-			dat += "<h2>[make_font_cool("ATTRIBUTES")]</h2>"
-
-			dat += "<b>Archetype</b><BR>"
-			var/datum/archetype/A = new archetype()
-			dat += "<a href='byond://?_src_=prefs;preference=archetype;task=input'>[A.name]</a> [A.specialization]<BR>"
-
-			//Prices for each ability, can be adjusted, multiplied by current attribute level
-			var/physique_price = 4
-			var/dexterity_price = 4
-			var/social_price = 4
-			var/mentality_price = 4
-			var/blood_price = 6
-			//Lockpicking and Athletics have an initial price of 3
-			var/lockpicking_price = !lockpicking ? 3 : 2
-			var/athletics_price = !athletics ? 3 : 2
-
-			dat += "<b>Physique:</b> [build_attribute_score(physique, A.archetype_additional_physique, physique_price, "physique")]"
-			dat += "<b>Dexterity:</b> [build_attribute_score(dexterity, A.archetype_additional_dexterity, dexterity_price, "dexterity")]"
-			dat += "<b>Social:</b> [build_attribute_score(social, A.archetype_additional_social, social_price, "social")]"
-			dat += "<b>Mentality:</b> [build_attribute_score(mentality, A.archetype_additional_mentality, mentality_price, "mentality")]"
-			dat += "<b>Cruelty:</b> [build_attribute_score(blood, A.archetype_additional_blood, blood_price, "blood")]"
-			dat += "<b>Lockpicking:</b> [build_attribute_score(lockpicking, A.archetype_additional_lockpicking, lockpicking_price, "lockpicking")]"
-			dat += "<b>Athletics:</b> [build_attribute_score(athletics, A.archetype_additional_athletics, athletics_price, "athletics")]"
 			dat += "Experience rewarded: [player_experience]<BR>"
 			if(pref_species.name == "Werewolf")
 				dat += "<h2>[make_font_cool("TRIBE")]</h2>"
@@ -671,8 +622,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					qdel(ACT)
 				dat += "<b>Initial Gifts:</b> [gifts_text]"
 				// These mobs should be made in nullspace to avoid dumping them onto the map somewhere.
-				var/mob/living/simple_animal/werewolf/crinos/DAWOF = new
-				var/mob/living/simple_animal/werewolf/lupus/DAWOF2 = new
+				var/mob/living/carbon/werewolf/crinos/DAWOF = new
+				var/mob/living/carbon/werewolf/lupus/DAWOF2 = new
 
 				DAWOF.sprite_color = werewolf_color
 				DAWOF2.sprite_color = werewolf_color
@@ -749,12 +700,18 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					dat += "<b>Marks:</b> <a href='byond://?_src_=prefs;preference=clan_acc;task=input'>[clan_accessory ? clan_accessory : "none"]</a><BR>"
 				else
 					clan_accessory = null
+				// Gargoyle Digitigrade Legs toggle
+				if(clan.name == "Gargoyle")
+					dat += "<b>Digitigrade Legs:</b> [digitigrade_legs ? "Enabled" : "Disabled"] "
+					dat += "<a href='byond://?_src_=prefs;preference=digitigradelegs;task=input'>Toggle</a><BR>"
 				dat += "<h2>[make_font_cool("DISCIPLINES")]</h2>"
 
 				for (var/i in 1 to discipline_types.len)
 					var/discipline_type = discipline_types[i]
 					var/datum/discipline/discipline = new discipline_type
 					var/discipline_level = discipline_levels[i]
+					///Maximum level the discipline can reach - based on generation.
+					var/max_discipline_level = clamp(13 - generation, 5, 10) //TFN EDIT - Original was 5
 
 					var/cost
 					if (discipline_level <= 0)
@@ -765,9 +722,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						cost = discipline_level * 5
 					else
 						cost = discipline_level * 7
-
-					dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"]([discipline_level])"
-					if((player_experience >= cost) && (discipline_level != 5))
+					if(generation <= 7)
+						dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"][discipline_level > 5 ? "•" : "o"][discipline_level > 6 ? "•" : "o"][discipline_level > 7 ? "•" : "o"][discipline_level > 8 ? "•" : "o"][discipline_level > 9 ? "•" : "o"]([discipline_level])"
+					else
+						dat += "<b>[discipline.name]</b>: [discipline_level > 0 ? "•" : "o"][discipline_level > 1 ? "•" : "o"][discipline_level > 2 ? "•" : "o"][discipline_level > 3 ? "•" : "o"][discipline_level > 4 ? "•" : "o"]"
+					if((player_experience >= cost) && (discipline_level != max_discipline_level))
 						dat += "<a href='byond://?_src_=prefs;preference=discipline;task=input;upgradediscipline=[i]'>Learn ([cost])</a><BR>"
 					else
 						dat += "<BR>"
@@ -775,7 +734,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					qdel(discipline)
 
 				if (clan.name == CLAN_NONE)
-					var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal
+					var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal - /datum/discipline/path - subtypesof(/datum/discipline/path)
 					for (var/discipline_type in possible_new_disciplines)
 						var/datum/discipline/discipline = new discipline_type
 						if (discipline.clan_restricted)
@@ -783,25 +742,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						qdel(discipline)
 					if (possible_new_disciplines.len && (player_experience >= 10))
 						dat += "<a href='byond://?_src_=prefs;preference=newdiscipline;task=input'>Learn a new Discipline (10)</a><BR>"
-
-				switch(clan.name)
-
-					if(CLAN_SALUBRI)
-
-						var/list/possible_new_valerens = list(/datum/discipline/valeren, /datum/discipline/valeren_warrior)
-						possible_new_valerens -= discipline_types
-
-						if (possible_new_valerens.len && (player_experience >= 10))
-							dat += "<a href='byond://?_src_=prefs;preference=newvaleren;task=input'>Learn a new Valeren Path (10)</a><BR>"
-
-					if(CLAN_SALUBRI_WARRIOR)
-
-						var/list/possible_new_valerens = list(/datum/discipline/valeren, /datum/discipline/valeren_warrior)
-						possible_new_valerens -= discipline_types
-
-						if (possible_new_valerens.len && (player_experience >= 10))
-							dat += "<a href='byond://?_src_=prefs;preference=newvaleren;task=input'>Learn a new Valeren Path (10)</a><BR>"
-
 
 			if(pref_species.name == "Ghoul")
 				for (var/i in 1 to discipline_types.len)
@@ -811,7 +751,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					dat += "-[discipline.desc]<BR>"
 					qdel(discipline)
 
-				var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal
+				var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal - /datum/discipline/path - subtypesof(/datum/discipline/path)
 				if (possible_new_disciplines.len && (player_experience >= 10))
 					dat += "<a href='byond://?_src_=prefs;preference=newghouldiscipline;task=input'>Learn a new Discipline (10)</a><BR>"
 
@@ -873,6 +813,10 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				dat += "<b>[morality_path.name]:</b> [path_score]/10"
 				if ((player_experience >= (path_score * 2)) && (path_score < 10))
 					dat += " <a href='byond://?_src_=prefs;preference=path;task=input'>Increase Path ([path_score * 2])</a>"
+				// TFN EDIT START: Adds a button to reduce path score
+				if ((path_score > 1))
+					dat += "<a href='byond://?_src_=prefs;preference=pathminus;task=input'>Lower Path (Free)</a>"
+				// TFN EDIT END
 				if(!slotlocked)
 					dat += "<a href='byond://?_src_=prefs;preference=pathof;task=input'>Switch Path</a>"
 				dat += "<BR><b>Description:</b> [morality_path.desc]<BR>"
@@ -951,8 +895,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 				dat += "<h3>[make_font_cool("SKIN")]</h3>"
 
-				dat += "<a href='byond://?_src_=prefs;preference=s_tone;task=input'>[skin_tone]</a>"
-//				dat += "<a href='byond://?_src_=prefs;preference=toggle_random;random_type=[RANDOM_SKIN_TONE]'>[(randomise[RANDOM_SKIN_TONE]) ? "Lock" : "Unlock"]</A>"
+				dat += "<span style='border: 1px solid #161616; background-color: [skin_tone];'>&nbsp;&nbsp;&nbsp;</span> <a href='byond://?_src_=prefs;preference=s_tone;task=input'>Change</a>"
 				dat += "<br>"
 
 			var/mutant_colors
@@ -1200,8 +1143,167 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				mutant_category = 0
 			dat += "</tr></table>"
 
+		if(1) // Attributes
+			var/datum/st_stat/freebie_stat = storyteller_stat_holder.get_stat_datum(STAT_FREEBIE_POINTS)
+			dat += "<center><h3>Freebie points left: [freebie_stat.points]</h3>"
+			dat += "<a href='byond://?_src_=prefs;preference=attributes;task=reset_stats'>Reset Stats</a><br></center>"
+			dat += "<hr>"
 
-		if (1) // Game Preferences
+			dat += "<table align='center' width='100%'>"
+			dat += "<h1>[make_font_cool("Pooled Stats")]</h1>"
+			dat += "<tr>"
+			for(var/datum/st_stat/pooled/stat as anything in subtypesof(/datum/st_stat/pooled))
+				dat += "<td>"
+				dat += "<div title=\"[stat.description]\">[stat.name]: [storyteller_stat_holder.build_attribute_score(stat, TRUE)] - [storyteller_stat_holder.get_stat(stat)] ([storyteller_stat_holder.get_stat(stat)])</div>"
+				if(stat.type == STAT_PERMANENT_WILLPOWER && !slotlocked)
+					dat += "<a href='byond://?_src_=prefs;preference=attributes;task=increase_stat;stat=[stat]'>+</a>"
+					dat += "<a href='byond://?_src_=prefs;preference=attributes;task=decrease_stat;stat=[stat]'>-</a><br>"
+				dat += "</td>"
+			dat += "</tr>"
+			dat += "</table>"
+
+			dat += "<hr>"
+
+			dat += "<table align='center' width='100%'>"
+			var/datum/st_stat/attribute_stat = storyteller_stat_holder.get_stat_datum(STAT_ATTRIBUTE)
+			dat += "<h1>[make_font_cool("Attributes")] - Points remaining: [attribute_stat.points]</h1>"
+			dat += "<tr>"
+			var/newattributeline = 0 //Purely used just so it doesn't overflow from the amount of abilities we have.
+			for(var/datum/st_stat/attribute/stat as anything in subtypesof(/datum/st_stat/attribute))
+				if(stat.type == stat.base_type)
+					continue
+				dat += "<td>"
+				dat += "<div title=\"[stat.description]\">[stat.name]: [storyteller_stat_holder.build_attribute_score(stat)] - [storyteller_stat_holder.get_stat(stat, FALSE)] ([storyteller_stat_holder.get_stat(stat)])</div>"
+				if(!slotlocked)
+					dat += "<a href='byond://?_src_=prefs;preference=attributes;task=increase_stat;stat=[stat]'>+</a>"
+					dat += "<a href='byond://?_src_=prefs;preference=attributes;task=decrease_stat;stat=[stat]'>-</a><br>"
+				dat += "</td>"
+
+				newattributeline++
+				if(newattributeline == 3)
+					dat += "</tr>"
+					dat += "<tr>"
+					newattributeline = 0
+			dat += "</tr>"
+			dat += "</table>"
+
+			dat += "<hr>"
+
+			dat += "<table align='center' width='100%'>"
+			var/datum/st_stat/ability_stat = storyteller_stat_holder.get_stat_datum(STAT_ABILITY)
+			dat += "<h1>[make_font_cool("Abilities")] - Points remaining: [ability_stat.points]</h1>"
+			dat += "<tr>"
+			var/newstatline = 0 //Purely used just so it doesn't overflow from the amount of abilities we have.
+			for(var/datum/st_stat/ability/stat as anything in subtypesof(/datum/st_stat/ability))
+				dat += "<td>"
+				dat += "<div title=\"[stat.description]\">[stat.name]: [storyteller_stat_holder.build_attribute_score(stat)] - [storyteller_stat_holder.get_stat(stat, FALSE)] ([storyteller_stat_holder.get_stat(stat)])</div>"
+				if(!slotlocked)
+					dat += "<a href='byond://?_src_=prefs;preference=attributes;task=increase_stat;stat=[stat]'>+</a>"
+					dat += "<a href='byond://?_src_=prefs;preference=attributes;task=decrease_stat;stat=[stat]'>-</a><br>"
+				dat += "</td>"
+
+				newstatline++
+				if(newstatline == 5)
+					dat += "</tr>"
+					dat += "<tr>"
+					newstatline = 0
+			dat += "</tr>"
+			dat += "</table>"
+
+			dat += "<hr>"
+
+			dat += add_virtue_stats()
+
+		// TFN ADDITION START: loadout
+		if(2) //Loadout
+			if(path)
+				var/savefile/S = new /savefile(path)
+				if(S)
+					dat += "<center>"
+					var/name
+					var/unspaced_slots = 0
+					for(var/i=1, i<=max_save_slots, i++)
+						unspaced_slots++
+						if(unspaced_slots > 4)
+							dat += "<br>"
+							unspaced_slots = 0
+						S.cd = "/character[i]"
+						S["real_name"] >> name
+						if(!name)
+							name = "Character[i]"
+						dat += "<a style='white-space:nowrap;' href='?_src_=prefs;preference=changeslot;num=[i];' [i == default_slot ? "class='linkOn'" : ""]>[name]</a> "
+					dat += "</center>"
+					dat += "<HR>"
+			var/list/type_blacklist = list()
+			var/list/slot_blacklist = list()
+			if(equipped_gear && length(equipped_gear))
+				for(var/i = 1, i <= length(equipped_gear), i++)
+					var/datum/gear/G = GLOB.gear_datums[equipped_gear[i]]
+					if(G)
+						if((G.subtype_path in type_blacklist) || (G.slot in slot_blacklist))
+							continue
+						type_blacklist += G.subtype_path
+						slot_blacklist += G.slot
+					else
+						equipped_gear.Cut(i,i+1)
+
+			dat += "<table align='center' width='100%'>"
+			dat += "<tr><td colspan=4><center><b>Experience: [player_experience]. Current loadout usage: [length(equipped_gear)]/[CONFIG_GET(number/max_loadout_items)].</b><br>\[<a href='?_src_=prefs;preference=gear;clear_loadout=1'>Clear Loadout</a>\] | \[<a href='?_src_=prefs;preference=gear;toggle_loadout=1'>Toggle Loadout</a>\]</center></td></tr>"
+			dat += "<tr><td colspan=4><center><b>"
+
+			var/firstcat = 1
+			for(var/category in GLOB.loadout_categories)
+				if(firstcat)
+					firstcat = 0
+				else
+					dat += " |"
+				if(category == gear_tab)
+					dat += " <span class='linkOff'>[category]</span> "
+				else
+					dat += " <a href='?_src_=prefs;preference=gear;select_category=[category]'>[category]</a> "
+			dat += "</b></center></td></tr>"
+
+			var/datum/loadout_category/LC = GLOB.loadout_categories[gear_tab]
+			dat += "<tr><td colspan=4><hr></td></tr>"
+			dat += "<tr><td colspan=4><b><center>[LC.category]</center></b></td></tr>"
+			if(LC.category == "Donator" && !user.client?.prefs?.donator)
+				dat += "<tr><td colspan=4><i><center>You must be a donator (https://thefinalnights.com/donate) to use these items.</center></i></td></tr>"
+				dat += "<tr><td colspan=4><i><center>If you have already donated, use the ?verifydonator command in Discord followed by your ckey and rejoin for it to update your status.</center></i></td></tr>"
+			else if(LC.category == "Donator" && user.client?.prefs?.donator)
+				dat += "<tr><td colspan=4><i><center><span>Thank you for donating! \<3</span></center></i></td></tr>"
+			dat += "<tr><td colspan=4><hr></td></tr>"
+
+			dat += "<tr><td colspan=4><hr></td></tr>"
+			dat += "<tr><td><b>Name</b></td>"
+			dat += "<td><b>Cost</b></td>"
+			dat += "<td><b>Restricted Jobs</b></td>"
+			dat += "<td><b>Description</b></td>"
+			dat += "<tr><td colspan=4><hr></td></tr>"
+			for(var/gear_name in LC.gear)
+				var/datum/gear/G = LC.gear[gear_name]
+				var/ticked = (G.display_name in equipped_gear)
+
+				dat += "<tr style='vertical-align:top;'><td width=35%>[G.display_name] "
+				if(G.display_name in purchased_gear)
+					dat += "<a style='white-space:normal;' [ticked ? "class='linkOn' " : ""]href='?_src_=prefs;preference=gear;toggle_gear=[G.display_name]'>" + (ticked ? "Unequip" : "Equip") + "</a></td>"
+				else
+					dat += "<a style='white-space:normal;' href='?_src_=prefs;preference=gear;purchase_gear=[G.display_name]'>Purchase</a>"
+					if(G.sort_category != "General" && G.sort_category != "Donator")
+						dat += "<a style='white-space:normal;' [ticked ? "class='linkOn' " : ""]href='?_src_=prefs;preference=gear;toggle_gear=[G.display_name]'>" + (ticked ? "Stop Preview" : "Preview") + "</a></td>"
+				dat += "<td width = 5% style='vertical-align:top;'>[G.cost]</td><td>"
+
+				if(G.allowed_roles)
+					dat += "<font size=2>"
+					var/list/allowedroles = list()
+					for(var/role in G.allowed_roles)
+						allowedroles += role
+					dat += english_list(allowedroles, null, ", ")
+					dat += "</font>"
+				dat += "</td><td><font size=2><i>[G.description]</i></font></td></tr>"
+			dat += "</table>"
+		// TFN ADDITION END: loadout
+
+		if (3) // Game Preferences
 			dat += "<table><tr><td width='340px' height='300px' valign='top'>"
 			dat += "<h2>[make_font_cool("GENERAL")]</h2>"
 			dat += "<b>UI Style:</b> <a href='byond://?_src_=prefs;task=input;preference=ui'>[UI_style]</a><br>"
@@ -1278,6 +1380,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				else
 					dat += "High"
 			dat += "</a><br>"
+			dat += "<b>Disable Vocal Sounds: </b> <a href= 'byond://?_src_=prefs;preference=disable_vocal_sounds'>[disable_vocal_sounds ? "Yes" : "No"]</a><br>" // TFN ADDITION - Vocal Sounds
+			dat += "<b>Preferred Vocal Sound: </b> <a href= 'byond://?_src_=prefs;preference=vocal_sound'>[vocal_sound]</a><br>" // TFN ADDITION - Vocal Sounds
 			dat += "<b>Use old discipline icons:</b> <a href='byond://?_src_=prefs;preference=old_discipline'>[old_discipline ? "Yes" : "No"]</a><br>"
 			dat += "<b>Ambient Occlusion:</b> <a href='byond://?_src_=prefs;preference=ambientocclusion'>[ambientocclusion ? "Enabled" : "Disabled"]</a><br>"
 			dat += "<b>Fit Viewport:</b> <a href='byond://?_src_=prefs;preference=auto_fit_viewport'>[auto_fit_viewport ? "Auto" : "Manual"]</a><br>"
@@ -1314,91 +1418,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				if(CONFIG_GET(flag/preference_map_voting))
 					dat += "<b>Preferred Map:</b> <a href='byond://?_src_=prefs;preference=preferred_map;task=input'>[p_map]</a><br>"
 
-		// TFN ADDITION START: loadout
-		if(2) //Loadout
-			if(path)
-				var/savefile/S = new /savefile(path)
-				if(S)
-					dat += "<center>"
-					var/name
-					var/unspaced_slots = 0
-					for(var/i=1, i<=max_save_slots, i++)
-						unspaced_slots++
-						if(unspaced_slots > 4)
-							dat += "<br>"
-							unspaced_slots = 0
-						S.cd = "/character[i]"
-						S["real_name"] >> name
-						if(!name)
-							name = "Character[i]"
-						dat += "<a style='white-space:nowrap;' href='?_src_=prefs;preference=changeslot;num=[i];' [i == default_slot ? "class='linkOn'" : ""]>[name]</a> "
-					dat += "</center>"
-					dat += "<HR>"
-			var/list/type_blacklist = list()
-			var/list/slot_blacklist = list()
-			if(equipped_gear && length(equipped_gear))
-				for(var/i = 1, i <= length(equipped_gear), i++)
-					var/datum/gear/G = GLOB.gear_datums[equipped_gear[i]]
-					if(G)
-						if((G.subtype_path in type_blacklist) || (G.slot in slot_blacklist))
-							continue
-						type_blacklist += G.subtype_path
-						slot_blacklist += G.slot
-					else
-						equipped_gear.Cut(i,i+1)
 
-			dat += "<table align='center' width='100%'>"
-			dat += "<tr><td colspan=4><center><b>Experience: [player_experience]. Current loadout usage: [length(equipped_gear)]/[CONFIG_GET(number/max_loadout_items)].</b><br>\[<a href='?_src_=prefs;preference=gear;clear_loadout=1'>Clear Loadout</a>\] | \[<a href='?_src_=prefs;preference=gear;toggle_loadout=1'>Toggle Loadout</a>\]</center></td></tr>"
-			dat += "<tr><td colspan=4><center><b>"
-
-			var/firstcat = 1
-			for(var/category in GLOB.loadout_categories)
-				if(firstcat)
-					firstcat = 0
-				else
-					dat += " |"
-				if(category == gear_tab)
-					dat += " <span class='linkOff'>[category]</span> "
-				else
-					dat += " <a href='?_src_=prefs;preference=gear;select_category=[category]'>[category]</a> "
-			dat += "</b></center></td></tr>"
-
-			var/datum/loadout_category/LC = GLOB.loadout_categories[gear_tab]
-			dat += "<tr><td colspan=4><hr></td></tr>"
-			dat += "<tr><td colspan=4><b><center>[LC.category]</center></b></td></tr>"
-			dat += "<tr><td colspan=4><hr></td></tr>"
-
-			dat += "<tr><td colspan=4><hr></td></tr>"
-			dat += "<tr><td><b>Name</b></td>"
-			dat += "<td><b>Cost</b></td>"
-			dat += "<td><b>Restricted Jobs</b></td>"
-			dat += "<td><b>Description</b></td>"
-			dat += "<tr><td colspan=4><hr></td></tr>"
-			for(var/gear_name in LC.gear)
-				var/datum/gear/G = LC.gear[gear_name]
-				var/ticked = (G.display_name in equipped_gear)
-
-				dat += "<tr style='vertical-align:top;'><td width=35%>[G.display_name] "
-				if(G.display_name in purchased_gear)
-					dat += "<a style='white-space:normal;' [ticked ? "class='linkOn' " : ""]href='?_src_=prefs;preference=gear;toggle_gear=[G.display_name]'>" + (ticked ? "Unequip" : "Equip") + "</a></td>"
-				else
-					dat += "<a style='white-space:normal;' href='?_src_=prefs;preference=gear;purchase_gear=[G.display_name]'>Purchase</a>"
-					if(G.sort_category != "General")
-						dat += "<a style='white-space:normal;' [ticked ? "class='linkOn' " : ""]href='?_src_=prefs;preference=gear;toggle_gear=[G.display_name]'>" + (ticked ? "Stop Preview" : "Preview") + "</a></td>"
-				dat += "<td width = 5% style='vertical-align:top;'>[G.cost]</td><td>"
-
-				if(G.allowed_roles)
-					dat += "<font size=2>"
-					var/list/allowedroles = list()
-					for(var/role in G.allowed_roles)
-						allowedroles += role
-					dat += english_list(allowedroles, null, ", ")
-					dat += "</font>"
-				dat += "</td><td><font size=2><i>[G.description]</i></font></td></tr>"
-			dat += "</table>"
-		// TFN ADDITION END: loadout
-
-		if(3) //OOC Preferences
+		if(4) //OOC Preferences
 			dat += "<table><tr><td width='340px' height='300px' valign='top'>"
 			dat += "<h2>[make_font_cool("OOC")]</h2>"
 			dat += "<b>Window Flashing:</b> <a href='byond://?_src_=prefs;preference=winflash'>[(windowflashing) ? "Enabled":"Disabled"]</a><br>"
@@ -1475,7 +1496,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 				dat += "</td>"
 			dat += "</tr></table>"
-		if(4) // Custom keybindings
+		if(5) // Custom keybindings
 			// Create an inverted list of keybindings -> key
 			var/list/user_binds = list()
 			for (var/key in key_bindings)
@@ -1518,15 +1539,16 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			dat += "</body>"
 	dat += "<hr><center>"
 
-	if(slotlocked)
-		dat += "Your character is saved. You can't change name and appearance, but your progress will be saved.<br>"
-	if(!IsGuestKey(user.key) && !slotlocked)
-		dat += "<a href='byond://?_src_=prefs;preference=load'>Undo</a> "
-		dat += "<a href='byond://?_src_=prefs;preference=save'>Save Character</a> "
-//	dat += "<a href='byond://?_src_=prefs;preference=save_pref'>Save Preferences</a> "
+	if((current_tab == 0))
+		if(slotlocked)
+			dat += "Your character is saved. You can't change name and appearance, but your progress will be saved.<br>"
+		if(!IsGuestKey(user.key) && !slotlocked)
+			dat += "<a href='byond://?_src_=prefs;preference=load'>Undo</a> "
+			dat += "<a href='byond://?_src_=prefs;preference=save'>Save Character</a> "
+	//	dat += "<a href='byond://?_src_=prefs;preference=save_pref'>Save Preferences</a> "
 
-	if(istype(user, /mob/dead/new_player))
-		dat += "<a href='byond://?_src_=prefs;preference=reset_all'>Reset Setup</a>"
+		if(istype(user, /mob/dead/new_player))
+			dat += "<a href='byond://?_src_=prefs;preference=reset_all'>Reset Setup</a>"
 	dat += "</center>"
 
 	winshow(user, "preferences_window", TRUE)
@@ -1534,23 +1556,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	popup.set_content(dat.Join())
 	popup.open(FALSE)
 	onclose(user, "preferences_window", src)
-
-//A proc that creates the score circles based on attribute and the additional bonus for the attribute
-//
-/datum/preferences/proc/build_attribute_score(attribute, bonus_number, price, variable_name)
-	var/dat
-	for(var/a in 1 to attribute)
-		dat += "•"
-	for(var/b in 1 to bonus_number)
-		dat += "•"
-	var/leftover_circles = 5 - attribute //5 is the default number of blank circles
-	for(var/c in 1 to leftover_circles)
-		dat += "o"
-	var/real_price = attribute ? (attribute*price) : price //In case we have an attribute of 0, we don't multiply by 0
-	if((player_experience >= real_price) && (attribute < ATTRIBUTE_BASE_LIMIT))
-		dat += "<a href='byond://?_src_=prefs;preference=[variable_name];task=input'>Increase ([real_price])</a>"
-	dat += "<br>"
-	return dat
 
 #undef APPEARANCE_CATEGORY_COLUMN
 #undef MAX_MUTANT_ROWS
@@ -1594,7 +1599,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		return "<font color=#290204>[rank]</font></td><td><font color=#290204> \[IN [(available_in_days)] DAYS\]</font></td></tr>"
 	if((generation > job.minimal_generation) && !bypass)
 		return "<font color=#290204>[rank]</font></td><td><font color=#290204> \[FROM [job.minimal_generation] GENERATION AND OLDER\]</font></td></tr>"
-	if((masquerade < job.minimal_masquerade) && !bypass)
+	if((masquerade_score < job.minimal_masquerade) && !bypass)
 		return "<font color=#290204>[rank]</font></td><td><font color=#290204> \[[job.minimal_masquerade] MASQUERADE POINTS REQUIRED\]</font></td></tr>"
 	if(!job.allowed_species.Find(pref_species.name) && !bypass)
 		return "<font color=#290204>[rank]</font></td><td><font color=#290204> \[[pref_species.name] RESTRICTED\]</font></td></tr>"
@@ -1689,7 +1694,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			if((generation > job.minimal_generation) && !bypass)
 				HTML += "<font color=#290204>[rank]</font></td><td><font color=#290204> \[FROM [job.minimal_generation] GENERATION AND OLDER\]</font></td></tr>"
 				continue
-			if((masquerade < job.minimal_masquerade) && !bypass)
+			if((masquerade_score < job.minimal_masquerade) && !bypass)
 				HTML += "<font color=#290204>[rank]</font></td><td><font color=#290204> \[[job.minimal_masquerade] MASQUERADE POINTS REQUIRED\]</font></td></tr>"
 				continue
 			if(!job.allowed_species.Find(pref_species.name) && !bypass)
@@ -1977,7 +1982,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		if(C)
 			C.clear_character_previews()
 
-/datum/preferences/proc/process_link(mob/user, list/href_list)
+/datum/preferences/proc/process_link(mob/living/user, list/href_list)
 	if(href_list["bancheck"])
 		var/list/ban_details = is_banned_from_with_details(user.ckey, user.client.address, user.client.computer_id, href_list["bancheck"])
 		var/admin = FALSE
@@ -2078,8 +2083,64 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				SetQuirks(user)
 		return TRUE
 
+	// TFN ADDITION START: attributes
+	else if(href_list["preference"] == "attributes")
+		var/datum/st_stat/freebie_stat = storyteller_stat_holder.get_stat_datum(STAT_FREEBIE_POINTS)
+		var/datum/st_stat/chosen_stat = text2path(href_list["stat"])
+		var/freebie_point_usage = 0
+		if(chosen_stat)
+			if(chosen_stat.type == STAT_PERMANENT_WILLPOWER)
+				freebie_point_usage = 1
+			if(chosen_stat.type in subtypesof(STAT_VIRTUE))
+				freebie_point_usage = 2
+			if(chosen_stat.type in subtypesof(STAT_ABILITY))
+				freebie_point_usage = 2
+			if(chosen_stat.type in subtypesof(STAT_ATTRIBUTE))
+				freebie_point_usage = 5
+
+		switch(href_list["task"])
+			if("increase_stat")
+				var/datum/st_stat/increased_stat = storyteller_stat_holder.get_stat_datum(chosen_stat)
+				var/datum/st_stat/increase_base_type_stat = storyteller_stat_holder.get_stat_datum(increased_stat.base_type)
+				if(increased_stat.score < increased_stat.starting_score)
+					increase_base_type_stat.points += 1
+				if(!increase_base_type_stat.points && !freebie_stat.points)
+					return
+				if(storyteller_stat_holder.get_stat(chosen_stat, FALSE) >= increase_base_type_stat.max_score)
+					return
+				if((storyteller_stat_holder.get_stat(chosen_stat) >= increase_base_type_stat.max_score) && increase_base_type_stat.count_bonus_score)
+					return
+				if(!storyteller_stat_holder.set_stat(chosen_stat, increased_stat.score + 1))
+					return
+				if(increase_base_type_stat.points > 0 && (increase_base_type_stat.score < increase_base_type_stat.max_level_before_freebie_points))
+					increase_base_type_stat.points -= 1
+				else
+					if((freebie_stat.points - freebie_point_usage) < 0)
+						storyteller_stat_holder.set_stat(chosen_stat, increased_stat.score - 1)
+						return
+					freebie_stat.points -= freebie_point_usage
+
+			if("decrease_stat")
+				var/datum/st_stat/decreased_stat = storyteller_stat_holder.get_stat_datum(chosen_stat)
+				var/datum/st_stat/decrease_base_type_stat = storyteller_stat_holder.get_stat_datum(decreased_stat.base_type)
+				if(!storyteller_stat_holder.set_stat(chosen_stat, decreased_stat.score - 1))
+					return
+				if(decreased_stat.score < decreased_stat.starting_score)
+					decrease_base_type_stat.points -= 1
+				if(decrease_base_type_stat.points < initial(decrease_base_type_stat.points))
+					decrease_base_type_stat.points += 1
+				else
+					freebie_stat.points += freebie_point_usage
+
+			if("reset_stats")
+				storyteller_stat_holder = null
+				storyteller_stat_holder = new()
+
+
+	// TFN ADDITION END
+
 	// TFN ADDITION START: loadout
-	if(href_list["preference"] == "gear")
+	else if(href_list["preference"] == "gear")
 		if(href_list["purchase_gear"])
 			var/datum/gear/TG = GLOB.gear_datums[href_list["purchase_gear"]]
 			if(TG.cost <= player_experience)
@@ -2108,7 +2169,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						if(G.subtype_path in type_blacklist)
 							continue
 						type_blacklist += G.subtype_path
-				if(!(TG.subtype_path in type_blacklist) && !(TG.slot in slot_blacklist) || TG.sort_category == "General")
+				if(!(TG.subtype_path in type_blacklist) && !(TG.slot in slot_blacklist) || TG.sort_category == "General" || TG.sort_category == "Donator")
 					equipped_gear += TG.display_name
 				else
 					tgui_alert(user, "Can't equip [TG.display_name]. It conflicts with an already-equipped item.")
@@ -2416,7 +2477,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					if((player_experience < 10) || !(pref_species.id == "kindred") || !(clan.name == CLAN_NONE))
 						return
 
-					var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal
+					var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal - /datum/discipline/path - subtypesof(/datum/discipline/path)
 					for (var/discipline_type in possible_new_disciplines)
 						var/datum/discipline/discipline = new discipline_type
 						if (discipline.clan_restricted)
@@ -2450,7 +2511,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					if((player_experience < 10) || !(pref_species.id == "ghoul"))
 						return
 
-					var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal
+					var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal - /datum/discipline/path - subtypesof(/datum/discipline/path)
 					var/new_discipline = tgui_input_list(user, "Select your new Discipline", "Discipline Selection", sort_list(possible_new_disciplines))
 					if(new_discipline)
 						discipline_types += new_discipline
@@ -2462,7 +2523,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					if((player_experience < 10) || !(pref_species.id == "kuei-jin"))
 						return
 
-					var/list/possible_new_disciplines = subtypesof(/datum/chi_discipline) - discipline_types
+					var/list/possible_new_disciplines = subtypesof(/datum/chi_discipline) - discipline_types - /datum/discipline/path - subtypesof(/datum/discipline/path)
 					var/has_chi_one = FALSE
 					var/has_demon_one = FALSE
 					var/how_much_usual = 0
@@ -2609,7 +2670,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 							if (slotlocked)
 								break
 
-							var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal
+							var/list/possible_new_disciplines = subtypesof(/datum/discipline) - discipline_types - /datum/discipline/bloodheal - /datum/discipline/path - subtypesof(/datum/discipline/path)
 							for(var/discipline_type in possible_new_disciplines)
 								var/datum/discipline/discipline = new discipline_type
 								if (discipline.clan_restricted)
@@ -2652,6 +2713,12 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						else
 							clan_accessory = pick(clan.accessories)
 
+				if("digitigradelegs")
+					if(clan.name != "Gargoyle")
+						return
+
+					digitigrade_legs = !digitigrade_legs
+
 				if("derangement")
 
 					if(!(pref_species.id == "kindred" ) || clan.name != CLAN_MALKAVIAN)
@@ -2674,34 +2741,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					experience_used_on_character += cost
 					auspice_level = max(1, auspice_level + 1)
 
-				if("physique")
-					if(handle_upgrade(physique, physique * 4))
-						physique++
-
-				if("dexterity")
-					if(handle_upgrade(dexterity, dexterity * 4))
-						dexterity++
-
-				if("social")
-					if(handle_upgrade(social, social * 4))
-						social++
-
-				if("mentality")
-					if(handle_upgrade(mentality, mentality * 4))
-						mentality++
-
-				if("blood")
-					if(handle_upgrade(blood, blood * 6))
-						blood++
-
-				if("lockpicking")
-					if(handle_upgrade(lockpicking, lockpicking ? lockpicking*2 : 3))
-						lockpicking++
-
-				if("athletics")
-					if(handle_upgrade(athletics, athletics ? athletics*2 : 3))
-						athletics++
-
 				if("tribe")
 					if(slotlocked || !(pref_species.id == "garou"))
 						return
@@ -2718,11 +2757,15 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						new_tribe = new newtype()
 						tribe = new_tribe
 						if (tribe.name == "Corax")
-							ADD_TRAIT(user,TRAIT_CORAX,tribe) //This might be redundant considering we also add this trait in auspice.dm
-
-							auspice=/datum/auspice/theurge // we do not want player to have a choice in the auspice, Corax being theurges is already silly enough
+							ADD_TRAIT(user, TRAIT_CORAX, tribe) //This might be redundant considering we also add this trait in auspice.dm
+							// Convert Lupus to Corvid, and default Metis to Corvid since Corax don't have them
+							if (breed == BREED_LUPUS || breed == BREED_METIS)
+								breed = BREED_CORVID
+							auspice = /datum/auspice/theurge // we do not want player to have a choice in the auspice, Corax being theurges is already silly enough
 						else
-							if HAS_TRAIT(user,TRAIT_CORAX)
+							if (breed == BREED_CORVID)
+								breed = BREED_LUPUS
+							if (HAS_TRAIT(user,TRAIT_CORAX))
 								REMOVE_TRAIT(user, TRAIT_CORAX,tribe)
 
 
@@ -2730,38 +2773,22 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					if(slotlocked || !(pref_species.id == "garou"))
 						return
 
-					var/new_breed = tgui_input_list(user, "Choose your Breed:", "Breed", sort_list(list("Homid", "Metis", "Lupus")))
+					var/available_breeds = list(BREED_HOMID, BREED_METIS, BREED_LUPUS)
+					// Alternative breed choices for the Corax
+					if (istype(tribe, /datum/garou_tribe/corax))
+						available_breeds = list(BREED_HOMID, BREED_CORVID)
+
+					var/new_breed = tgui_input_list(user, "Choose your Breed:", "Breed", sort_list(available_breeds))
 					if (new_breed)
 						breed = new_breed
-
-				if("archetype")
-					if(slotlocked)
-						return
-
-					if (tgui_alert(user, "Are you sure you want to change Archetype? This will reset your attributes.", "Confirmation", list("Yes", "No")) != "Yes")
-						return
-
-					var/list/archetypes = list()
-					for(var/i in subtypesof(/datum/archetype))
-						var/datum/archetype/the_archetype = i
-						archetypes[initial(the_archetype.name)] = i
-					var/result = tgui_input_list(user, "Select an archetype", "Attributes Selection", sort_list(archetypes))
-					if(result)
-						archetype = archetypes[result]
-						var/datum/archetype/archetip = new archetype()
-						physique = archetip.start_physique
-						dexterity = archetip.start_dexterity
-						mentality = archetip.start_mentality
-						social = archetip.start_social
-						blood = archetip.start_blood
-						lockpicking = archetip.start_lockpicking
-						athletics = archetip.start_athletics
 
 				if("discipline")
 					if(pref_species.id == "kindred")
 						var/i = text2num(href_list["upgradediscipline"])
 
 						var/discipline_level = discipline_levels[i]
+						var/max_discipline_level = clamp(13 - generation, 5, 10) //TFN EDIT - Original was 5
+
 						var/cost = discipline_level * 7
 						if (discipline_level <= 0)
 							cost = 10
@@ -2772,12 +2799,12 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						else if (clan.clan_disciplines.Find(discipline_types[i]))
 							cost = discipline_level * 5
 
-						if ((player_experience < cost) || (discipline_level >= 5))
+						if ((player_experience < cost) || (discipline_level >= max_discipline_level))
 							return
 
 						player_experience -= cost
 						experience_used_on_character += cost
-						discipline_levels[i] = min(5, max(1, discipline_levels[i] + 1))
+						discipline_levels[i] = min(max_discipline_level, max(1, discipline_levels[i] + 1))
 
 					if(pref_species.id == "kuei-jin")
 						var/a = text2num(href_list["upgradechidiscipline"])
@@ -2802,6 +2829,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					player_experience -= cost
 					experience_used_on_character += cost
 					path_score = clamp(path_score + 1, MIN_PATH_SCORE, MAX_PATH_SCORE)
+
+				// TFN EDIT ADDITION START: Adding the ability to lower your path score
+				if("pathminus")
+					path_score = clamp(path_score - 1, MIN_PATH_SCORE, MAX_PATH_SCORE)
+				// TFN EDIT ADDITION END
 
 				if("pathof")
 					if(slotlocked || !(pref_species.id == "kindred"))
@@ -3011,8 +3043,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					var/bonus = generation-generation_bonus
 					slotlocked = 0
 					torpor_count = 0
-					masquerade = initial(masquerade)
-					generation = clamp(bonus, LOWEST_GENERATION_LIMIT, HIGHEST_GENERATION_LIMIT)
+					masquerade_score = initial(masquerade_score)
+					generation = clamp(bonus, LOWEST_GENERATION_LIMIT, HIGHEST_GENERATION_LIMIT) //TFN EDIT - Previous lower limit 7
 					generation_bonus = 0
 					save_character()
 
@@ -3043,6 +3075,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						SetQuirks(user)
 						var/newtype = GLOB.species_list[result]
 						pref_species = new newtype()
+						storyteller_stat_holder = null
+						storyteller_stat_holder = new()
 						switch(pref_species.id)
 							if("ghoul","human","kuei-jin")
 								discipline_types.Cut()
@@ -3163,9 +3197,43 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					if(slotlocked)
 						return
 
-					var/new_s_tone = tgui_input_list(user, "Choose your character's skin-tone:", "Character Preference", GLOB.skin_tones)
+
+					var/new_s_tone = tgui_input_list(user, "Choose your Character's Skin Tone archetype or Customize it:", "Character Preference", GLOB.skin_tones)
+
 					if(new_s_tone)
-						skin_tone = new_s_tone
+
+						if(new_s_tone == "custom")
+
+							var/new_mutantcolor = input(user, "Customize your character's skin color (OUTLANDISH COLORS WILL GET YOU BANNED):", "Character Preference", skin_tone) as color|null
+							if(new_mutantcolor)
+								if(new_mutantcolor == "#000000")
+									skin_tone = "#471c18"
+								else
+									var/colorization  = sanitize_hexcolor(new_mutantcolor)
+									var/list/existing_color = rgb2num(colorization, COLORSPACE_HSV)
+									existing_color += 255 //FOR SOME REASON THERE ISNT AN ALPHA WHEN YOU DO THE REGULAR rg2num.
+									var/hue = existing_color[1]
+
+									if(hue < 0)
+										to_chat(user, span_notice("Hue too low in degree, defaulting to 0"))
+										hue = 0
+
+									else if(hue > 60)
+										to_chat(user, span_notice("Hue too high in degree, defaulting to 60"))
+										hue = 60
+
+									var/sat = existing_color[2]
+
+									var/val = existing_color[3]
+
+									var/list/conv_color = list(hue, sat, val, 255)
+
+									var/hsv_color = rgb(hue = conv_color[1], saturation = conv_color[2], value = conv_color[3], alpha = conv_color[4], space = COLORSPACE_HSV)
+
+									skin_tone = hsv_color
+
+						else
+							skin_tone = new_s_tone
 
 				if("ooccolor")
 					var/new_ooccolor = input(user, "Choose your OOC colour:", "Game Preference",ooccolor) as color|null
@@ -3550,6 +3618,22 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				if("old_discipline")
 					old_discipline = !old_discipline
 
+				// TFN ADDITION START - Vocal Sounds
+				if("vocal_sound")
+					switch(vocal_sound)
+						if("Talk")
+							vocal_sound = "Pencil"
+						if("Pencil")
+							vocal_sound = "None"
+						if("None")
+							vocal_sound = "Talk"
+						else
+							vocal_sound = "Talk" // fallback to default
+
+				if("disable_vocal_sounds")
+					disable_vocal_sounds = !disable_vocal_sounds
+				// TFN ADDITION END - Vocal Sounds
+
 				if("widescreenpref")
 					widescreenpref = !widescreenpref
 					user.client.view_size.setDefault(getScreenSize(widescreenpref))
@@ -3696,32 +3780,13 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	character.dna.real_name = character.real_name
 
 	character.diablerist = diablerist
+	character.storyteller_stat_holder = storyteller_stat_holder
 
-	character.physique = physique
-	character.dexterity = dexterity
-	character.social = social
-	character.mentality = mentality
-	character.blood = blood
-	character.lockpicking = lockpicking
-	character.athletics = athletics
 
-	var/datum/archetype/A = new archetype()
-	character.additional_physique = A.archetype_additional_physique
-	character.additional_dexterity = A.archetype_additional_dexterity
-	character.additional_social = A.archetype_additional_social
-	character.additional_mentality = A.archetype_additional_mentality
-	character.additional_blood = A.archetype_additional_blood
-	character.additional_lockpicking = A.archetype_additional_lockpicking
-	character.additional_athletics = A.archetype_additional_athletics
-	A.special_skill(character)
-
-	character.masquerade = masquerade
-	if(!character_setup)
-		if(character in GLOB.masquerade_breakers_list)
-			if(character.masquerade > 2)
-				GLOB.masquerade_breakers_list -= character
-		else if(character.masquerade < 3)
-			GLOB.masquerade_breakers_list += character
+	if(!character_setup && !istype(character, /mob/living/carbon/human/dummy))
+		for(var/i = 5; i > masquerade_score; i--)
+			SSmasquerade.masquerade_breach(GLOB.blood_hunt_announcers, character, MASQUERADE_REASON_PREFERENCES)
+		SSmasquerade.masquerade_breacher_check(character)
 
 	switch (body_model)
 		if (SLIM_BODY_MODEL_NUMBER)
@@ -3731,8 +3796,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		if (FAT_BODY_MODEL_NUMBER)
 			character.set_body_model(FAT_BODY_MODEL)
 
-	character.maxHealth = round((initial(character.maxHealth)+(initial(character.maxHealth)/4)*(character.physique + character.additional_physique)))
-	character.health = character.maxHealth
+	character.st_recalculate_stats(null, TRUE)
 
 	if (pref_species.name == "Kuei-Jin")
 		character.yang_chi = yang
@@ -3753,23 +3817,43 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		character.morality_path = MOR
 
 		character.generation = generation
-		character.maxbloodpool = 10 + ((13 - generation) * 3)
-		character.bloodpool = rand(2, character.maxbloodpool)
 
+		character.calculate_max_bloodpool()
+		character.bloodpool = rand(2, character.maxbloodpool)
+		if(generation <= 3) //The INFINITY value messes with assignment - This works for a general patch.
+			character.bloodpool = character.maxbloodpool
 		character.set_clan(clan, TRUE)
 
 		character.max_yin_chi = character.maxbloodpool
 		character.yin_chi = character.max_yin_chi
 
 		// TODO: detach is_enlightened from the clan datum
-		// Apply Clan accessory
+		// Apply digitigrade legs if pref is enabled
+		if(digitigrade_legs && character.clan?.name == "Gargoyle")
+
+			if(character.shoes)
+				qdel(character.shoes)
+
+			character.Digitigrade_Leg_Swap(FALSE)
+			character.remove_overlay(MARKS_LAYER)
+			var/mutable_appearance/legs_overlay = mutable_appearance('code/modules/wod13/icons.dmi', "gargoyle_legs_n_tails", -MARKS_LAYER)
+			character.overlays_standing[MARKS_LAYER] = legs_overlay
+			character.apply_overlay(MARKS_LAYER)
+		else if(character.clan?.name == "Gargoyle")
+			character.Digitigrade_Leg_Swap(TRUE)
+
+		// Apply clan marks (accessories)
 		if (character.clan?.accessories?.Find(clan_accessory))
 			var/accessory_layer = character.clan.accessories_layers[clan_accessory]
-			character.remove_overlay(accessory_layer)
-			var/mutable_appearance/acc_overlay = mutable_appearance('code/modules/wod13/icons.dmi', clan_accessory, -accessory_layer)
-			character.overlays_standing[accessory_layer] = acc_overlay
-			character.apply_overlay(accessory_layer)
 
+			//gargoyle marks use unicorn_layer not marks_layer, marks_layer for gargoyles is being used for the digitigrade legs toggle. all other accessories use the else block
+			if(digitigrade_legs && character.clan?.name == "Gargoyle" && accessory_layer == MARKS_LAYER)
+				return
+			else
+				character.remove_overlay(accessory_layer)
+				var/mutable_appearance/acc_overlay = mutable_appearance('code/modules/wod13/icons.dmi', clan_accessory, -accessory_layer)
+				character.overlays_standing[accessory_layer] = acc_overlay
+				character.apply_overlay(accessory_layer)
 		character.morality_path.score = path_score
 	else
 		character.set_clan(null)
@@ -3806,22 +3890,15 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		character.auspice.tribe = tribe
 		character.auspice.on_gain(character)
 
-		switch(breed)
-			if("Homid")
-				character.auspice.gnosis = 1 + character.extra_gnosis
-				character.auspice.start_gnosis = 1 + character.extra_gnosis
-				character.auspice.base_breed = "Homid"
-			if("Lupus")
-				character.auspice.gnosis = 5 + character.extra_gnosis
-				character.auspice.start_gnosis = 5 + character.extra_gnosis
-				character.auspice.base_breed = "Lupus"
-			if("Metis")
-				character.auspice.gnosis = 3 + character.extra_gnosis
-				character.auspice.start_gnosis = 3 + character.extra_gnosis
-				character.auspice.base_breed = "Crinos"
+		// TFN EDIT START: Enter breed form on death
+		character.auspice.set_breed(breed, character)
+
+		character.auspice.gnosis += character.extra_gnosis
+		character.auspice.start_gnosis += character.extra_gnosis
+		// TFN EDIT END: Enter breed form on death
 		if(character.transformator?.crinos_form && character.transformator?.lupus_form && !HAS_TRAIT(character,TRAIT_CORAX))
-			var/mob/living/simple_animal/werewolf/crinos/crinos = character.transformator.crinos_form?.resolve()
-			var/mob/living/simple_animal/werewolf/lupus/lupus = character.transformator.lupus_form?.resolve()
+			var/mob/living/carbon/werewolf/crinos/crinos = character.transformator.crinos_form?.resolve()
+			var/mob/living/carbon/werewolf/lupus/lupus = character.transformator.lupus_form?.resolve()
 
 			if(!crinos)
 				character.transformator.crinos_form = null
@@ -3854,25 +3931,12 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				lupus.real_name = real_name
 				lupus.true_real_name = real_name
 				lupus.name = real_name
-			crinos.physique = physique
-			crinos.dexterity = dexterity
-			crinos.mentality = mentality
-			crinos.social = social
-			crinos.blood = blood
 
-			lupus.physique = physique
-			lupus.dexterity = dexterity
-			lupus.mentality = mentality
-			lupus.social = social
-			lupus.blood = blood
-
-			lupus.maxHealth = round((lupus::maxHealth + (character::maxHealth / 4) * (character.physique + character.additional_physique))) + (character.auspice.level - 1) * 50
-			lupus.health = lupus.maxHealth
-			crinos.maxHealth = round((crinos::maxHealth + (character::maxHealth / 4) * (character.physique + character.additional_physique))) + (character.auspice.level - 1) * 50
-			crinos.health = crinos.maxHealth
+			lupus.st_recalculate_stats(null, TRUE)
+			crinos.st_recalculate_stats(null, TRUE)
 		else if(HAS_TRAIT(character,TRAIT_CORAX)/*character.transformator?.corax_form && character.transformator?.corvid_form*/) // if we have the Corax tribe, use the Corax forms instead..
-			var/mob/living/simple_animal/werewolf/corax/corax_crinos/cor_crinos = character.transformator.corax_form?.resolve()
-			var/mob/living/simple_animal/werewolf/lupus/corvid/corvid = character.transformator.corvid_form?.resolve()
+			var/mob/living/carbon/werewolf/corax/corax_crinos/cor_crinos = character.transformator.corax_form?.resolve()
+			var/mob/living/carbon/werewolf/lupus/corvid/corvid = character.transformator.corvid_form?.resolve()
 
 			if(!cor_crinos)
 				character.transformator.corax_form = null
@@ -3897,23 +3961,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				cor_crinos.name = real_name
 				corvid.name = real_name
 
-			cor_crinos.physique = physique
-			cor_crinos.dexterity = dexterity
-			cor_crinos.mentality = mentality
-			cor_crinos.social = social
-			cor_crinos.blood = blood
-
-			corvid.physique = physique
-			corvid.dexterity = dexterity
-			corvid.mentality = mentality
-			corvid.social = social
-			corvid.athletics = athletics // corvid also get athletics so that they can jump further, might be absolutely batshit though
-			corvid.blood = blood
-
-			corvid.maxHealth = round((corvid::maxHealth + (character::maxHealth / 4) * (character.physique + character.additional_physique))) + (character.auspice.level - 1) * 50
-			corvid.health = corvid.maxHealth
-			cor_crinos.maxHealth = round((cor_crinos::maxHealth + (character::maxHealth / 4) * (character.physique + character.additional_physique))) + (character.auspice.level - 1) * 50
-			cor_crinos.health = cor_crinos.maxHealth
+			corvid.st_recalculate_stats(null, TRUE)
+			cor_crinos.st_recalculate_stats(null, TRUE)
 
 	// TFN ADDITION START: loadout
 	if(loadout)

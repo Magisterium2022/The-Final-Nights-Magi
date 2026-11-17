@@ -492,6 +492,13 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 
 /client/Del()
 	if(!gc_destroyed)
+		gc_destroyed = world.time
+		if (!QDELING(src))
+			stack_trace("Client does not purport to be QDELING, this is going to cause bugs in other places!")
+
+		// Yes this is the same as what's found in qdel(). Yes it does need to be here
+		// Get off my back
+		SEND_SIGNAL(src, COMSIG_QDELETING, TRUE)
 		Destroy() //Clean up signals and timers.
 	return ..()
 
@@ -588,26 +595,6 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	if(!query_client_in_db.Execute())
 		qdel(query_client_in_db)
 		return
-	/*
-	//If we aren't an admin, and the flag is set
-	if(CONFIG_GET(flag/panic_bunker) && !holder && !GLOB.deadmins[ckey] && !bunker_bypass_check())
-		var/reject_message = "Failed Login: [key] - New account attempting to connect during panic bunker"
-		log_access(reject_message)
-		message_admins("<span class='adminnotice'>[reject_message]</span>")
-		var/message = CONFIG_GET(string/panic_bunker_message)
-		to_chat(src, message)
-		var/list/connectiontopic_a = params2list(connectiontopic)
-		var/list/panic_addr = CONFIG_GET(string/panic_server_address)
-		if(panic_addr && !connectiontopic_a["redirect"])
-			var/panic_name = CONFIG_GET(string/panic_server_name)
-			to_chat(src, "<span class='notice'>Sending you to [panic_name ? panic_name : panic_addr].</span>")
-			winset(src, null, "command=.options")
-			src << link("[panic_addr]?redirect=1")
-		qdel(query_client_in_db)
-		qdel(src)
-		return
-	// TFN EDIT END
-	*/
 
 	var/client_is_in_db = query_client_in_db.NextRow()
 	// TFN EDIT ADDITION START: code borrowed from bubberstation & skyrat
@@ -629,13 +616,13 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 			return
 	// TFN EDIT ADDITION END
 
-	if(!query_client_in_db.NextRow())
+	if(!client_is_in_db)
 		new_player = 1
 		account_join_date = findJoinDate()
 		var/datum/db_query/query_add_player = SSdbcore.NewQuery({"
-			INSERT INTO [format_table_name("player")] (`ckey`, `byond_key`, `firstseen`, `firstseen_round_id`, `lastseen`, `lastseen_round_id`, `ip`, `computerid`, `lastadminrank`, `accountjoindate`)
-			VALUES (:ckey, :key, Now(), :round_id, Now(), :round_id, INET_ATON(:ip), :computerid, :adminrank, :account_join_date)
-		"}, list("ckey" = ckey, "key" = key, "round_id" = GLOB.round_id, "ip" = address, "computerid" = computer_id, "adminrank" = admin_rank, "account_join_date" = account_join_date || null))
+			INSERT INTO [format_table_name("player")] (`ckey`, `byond_key`, `firstseen`, `firstseen_round_id`, `lastseen`, `lastseen_round_id`, `ip`, `computerid`, `lastadminrank`, `accountjoindate`, `age_verified`)
+			VALUES (:ckey, :key, Now(), :round_id, Now(), :round_id, INET_ATON(:ip), :computerid, :adminrank, :account_join_date, :age_verified)
+		"}, list("ckey" = ckey, "key" = key, "round_id" = GLOB.round_id, "ip" = address, "computerid" = computer_id, "adminrank" = admin_rank, "account_join_date" = account_join_date || null, "age_verified" = TRUE))
 		if(!query_add_player.Execute())
 			qdel(query_client_in_db)
 			qdel(query_add_player)
@@ -673,6 +660,7 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 					)
 					if(!query_datediff.Execute())
 						qdel(query_datediff)
+						qdel(query_get_client_age)
 						return
 					if(query_datediff.NextRow())
 						account_age = text2num(query_datediff.item[1])
@@ -689,6 +677,41 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 		INSERT INTO `[format_table_name("connection_log")]` (`id`,`datetime`,`server_ip`,`server_port`,`round_id`,`ckey`,`ip`,`computerid`)
 		VALUES(null,Now(),INET_ATON(:internet_address),:port,:round_id,:ckey,INET_ATON(:ip),:computerid)
 	"}, list("internet_address" = world.internet_address || "0", "port" = world.port, "round_id" = GLOB.round_id, "ckey" = ckey, "ip" = address, "computerid" = computer_id))
+
+	//TFN EDIT START
+	var/datum/db_query/query_get_player_age_verified = SSdbcore.NewQuery(
+		"SELECT age_verified FROM [format_table_name("player")] WHERE ckey = :ckey AND age_verified = 1",
+		list("ckey" = ckey)
+	)
+	if(!query_get_player_age_verified.Execute())
+		qdel(query_get_player_age_verified)
+		return
+	if(!query_get_player_age_verified.NextRow())
+		log_access("Failed Login: [key] - [address] - Age unverified account attempting connection.")
+		message_admins(span_adminnotice("Failed Login: [key] - [address] - Age unverified account attempting connection."))
+		var/forumurl = CONFIG_GET(string/forumurl)
+		to_chat_immediate(src, span_reallybig(span_danger(("Hi! This server requires age verification. <br><br>To join our community, apply through the Discord: [forumurl]"))))
+		qdel(query_get_player_age_verified)
+		sleep(3 SECONDS)
+		qdel(src)
+		return
+	qdel(query_get_player_age_verified)
+
+	var/datum/db_query/query_get_player_donator = SSdbcore.NewQuery(
+		"SELECT donator FROM [format_table_name("player")] WHERE ckey = :ckey AND donator = 1",
+		list("ckey" = src.ckey)
+	)
+	if(!query_get_player_donator.Execute())
+		qdel(query_get_player_donator)
+		return
+	if(!query_get_player_donator.NextRow())
+		qdel(query_get_player_donator)
+		return
+	to_chat(src, span_hypnophrase("Donator status verified. Thank you for your support!"))
+	prefs.donator = TRUE
+	prefs.save_preferences()
+	qdel(query_get_player_donator)
+	//TFN EDIT END
 
 	SSserver_maint.UpdateHubStatus()
 
